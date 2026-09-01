@@ -279,7 +279,8 @@ const COL = {
     FLAG_SEGUIMIENTO:"FLAG_SEGUIMIENTO",
     CONTACTO:"CONTACTO",
     SIN_PAGO:"SIN PAGO",
-    CON_PAGO:"CON PAGO"
+    CON_PAGO:"CON PAGO",
+    NO_CONTACTO:"NO CONTACTO"
 };
 
 function texto(v){
@@ -354,9 +355,13 @@ function agrupar(rows,col){
     return map;
 }
 
+function coberturaGestion(rows){
+    return rows.reduce((total,row)=>total+numero(valor(row,COL.GEST_CALL)),0);
+}
+
 function calcularMetricas(rows){
     let cartera=0, recuperado=0, qOperation=0, qUnico=0, qConPago=0, qSinPago=0;
-    let seguimientos=0, promesas=0, contactosDirectos=0, montoPromesas=0, promesasCumplidas=0;
+    let seguimientos=0, promesas=0, contactosDirectos=0, noContactos=0, montoPromesas=0, promesasCumplidas=0;
 
     rows.forEach(row=>{
         if(texto(valor(row,COL.OP))!=="") qOperation++;
@@ -374,19 +379,21 @@ function calcularMetricas(rows){
         const flagPromesa=numero(valor(row,COL.FLAG_PROMESA));
         promesas += flagPromesa;
         contactosDirectos += numero(valor(row,COL.CONTACTO));
+        noContactos += numero(valor(row,COL.NO_CONTACTO));
 
         if(flagPromesa>0){
-            montoPromesas += pago;
+            montoPromesas += numero(valor(row,COL.CARTERA));
             if(pago>0) promesasCumplidas++;
         }
     });
 
     return {
         cartera, recuperado, saldo:cartera-recuperado, qOperation, qUnico,
-        qConPago, qSinPago, seguimientos, promesas, contactosDirectos,
+        qConPago, qSinPago, seguimientos, promesas, contactosDirectos, noContactos,
         montoPromesas, promesasCumplidas,
         porcentajeRecuperacion:cartera>0 ? recuperado/cartera*100 : 0,
         porcentajeContactoDirecto:qOperation>0 ? contactosDirectos/qOperation*100 : 0,
+        porcentajeCD:coberturaGestion(rows)>0 ? contactosDirectos/coberturaGestion(rows)*100 : 0,
         efectPDP:promesas>0 ? promesasCumplidas/promesas*100 : 0
     };
 }
@@ -647,6 +654,181 @@ function crearGraficoBarras(id,labels,datasets,formato){
     });
 }
 
+function crearGraficoDona(id,labels,data){
+    destruirChart(id);
+    const canvas=document.getElementById(id);
+    if(!canvas || typeof Chart==="undefined") return;
+
+    APP.charts[id]=new Chart(canvas,{
+        type:"doughnut",
+        data:{
+            labels,
+            datasets:[{
+                data,
+                backgroundColor:["#8FC9ED","#F7A8BB"],
+                borderColor:"#FFFFFF",
+                borderWidth:2
+            }]
+        },
+        plugins:[ChartDataLabels],
+        options:{
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{position:"top"},
+                datalabels:{
+                    color:"#173B58",
+                    font:{size:11,weight:"bold"},
+                    formatter:(value,context)=>{
+                        const total=context.dataset.data.reduce((a,b)=>a+b,0);
+                        const pct=total>0 ? value/total*100 : 0;
+                        return entero(value)+"\\n"+porcentaje(pct);
+                    }
+                }
+            }
+        }
+    });
+}
+
+function crearGraficoRanking(id,labels,data){
+    destruirChart(id);
+    const canvas=document.getElementById(id);
+    if(!canvas || typeof Chart==="undefined") return;
+
+    APP.charts[id]=new Chart(canvas,{
+        type:"bar",
+        data:{
+            labels,
+            datasets:[{
+                label:"Recuperado USD",
+                data,
+                backgroundColor:"#8FC9ED"
+            }]
+        },
+        plugins:[ChartDataLabels],
+        options:{
+            indexAxis:"y",
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{
+                legend:{position:"top"},
+                datalabels:{
+                    anchor:"end",
+                    align:"right",
+                    font:{size:9,weight:"bold"},
+                    formatter:value=>dinero(value)
+                }
+            },
+            scales:{
+                x:{beginAtZero:true},
+                y:{ticks:{font:{size:9}}}
+            }
+        }
+    });
+}
+
+function tablaDetalleTramo(rows){
+    const orden=["PREVENTIVO","TRAMO 1","TRAMO 2","TRAMO 3"];
+    const grupos=agrupar(rows,COL.TRAMO);
+    let html=`
+    <div class="card">
+        <h2 class="card-title">Detalle por TRAMO_CARTERA</h2>
+        <p class="card-sub">Exposición, recuperación, saldo, operaciones, socios, contacto y promesas.</p>
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tramo</th><th>Cartera</th><th>Recuperado</th><th>% Rec.</th><th>Saldo</th>
+                    <th>Q_OPERATION</th><th>Q_UNICO</th><th>Con pago</th><th>Sin pago</th>
+                    <th>CD</th><th>NC</th><th>% CD</th>
+                    <th>Q_Promesas</th><th>Monto Promesas</th><th>% Efect. PDP</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    orden.forEach(tramo=>{
+        if(!grupos.has(tramo)) return;
+        const m=calcularMetricas(grupos.get(tramo));
+        html+=`
+            <tr>
+                <td><b>${escapeHTML(tramo)}</b></td>
+                <td>${dinero(m.cartera)}</td>
+                <td>${dinero(m.recuperado)}</td>
+                <td>${porcentaje(m.porcentajeRecuperacion)}</td>
+                <td>${dinero(m.saldo)}</td>
+                <td>${entero(m.qOperation)}</td>
+                <td>${entero(m.qUnico)}</td>
+                <td>${entero(m.qConPago)}</td>
+                <td>${entero(m.qSinPago)}</td>
+                <td>${entero(m.contactosDirectos)}</td>
+                <td>${entero(m.noContactos)}</td>
+                <td>${porcentaje(m.porcentajeCD)}</td>
+                <td>${entero(m.promesas)}</td>
+                <td>${dinero(m.montoPromesas)}</td>
+                <td>${porcentaje(m.efectPDP)}</td>
+            </tr>`;
+    });
+
+    html+=`</tbody></table></div></div>`;
+    return html;
+}
+
+function tablaDetalleTramoTipo(rows){
+    const ordenTramos=["PREVENTIVO","TRAMO 1","TRAMO 2","TRAMO 3"];
+    const ordenTipos=["NORMAL","TAXI","BIGTICKET","BALON","1RA4TA5TA","TOP"];
+    let html=`
+    <div class="card">
+        <h2 class="card-title">Detalle por TRAMO_CARTERA + TIPO_CUOTA</h2>
+        <p class="card-sub">NORMAL → TAXI → BIGTICKET → BALON → 1ra4ta5ta → TOP.</p>
+        <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tramo</th><th>TIPO_CUOTA</th><th>Cartera</th><th>Recuperado</th><th>% Rec.</th><th>Saldo</th>
+                    <th>Q_OPERATION</th><th>Q_UNICO</th><th>Con pago</th><th>Sin pago</th>
+                    <th>CD</th><th>NC</th><th>% CD</th>
+                    <th>Q_Promesas</th><th>Monto Promesas</th><th>% Efect. PDP</th>
+                </tr>
+            </thead>
+            <tbody>`;
+
+    ordenTramos.forEach(tramo=>{
+        const tramoRows=rows.filter(row=>normalizar(valor(row,COL.TRAMO))===tramo);
+        if(!tramoRows.length) return;
+        const grupos=agrupar(tramoRows,COL.TIPO);
+
+        ordenTipos.forEach(tipoOrden=>{
+            const entry=[...grupos.entries()].find(([tipo])=>normalizar(tipo)===tipoOrden);
+            if(!entry) return;
+            const [tipo,data]=entry;
+            const m=calcularMetricas(data);
+
+            html+=`
+                <tr>
+                    <td><b>${escapeHTML(tramo)}</b></td>
+                    <td><b>${escapeHTML(tipo)}</b></td>
+                    <td>${dinero(m.cartera)}</td>
+                    <td>${dinero(m.recuperado)}</td>
+                    <td>${porcentaje(m.porcentajeRecuperacion)}</td>
+                    <td>${dinero(m.saldo)}</td>
+                    <td>${entero(m.qOperation)}</td>
+                    <td>${entero(m.qUnico)}</td>
+                    <td>${entero(m.qConPago)}</td>
+                    <td>${entero(m.qSinPago)}</td>
+                    <td>${entero(m.contactosDirectos)}</td>
+                    <td>${entero(m.noContactos)}</td>
+                    <td>${porcentaje(m.porcentajeCD)}</td>
+                    <td>${entero(m.promesas)}</td>
+                    <td>${dinero(m.montoPromesas)}</td>
+                    <td>${porcentaje(m.efectPDP)}</td>
+                </tr>`;
+        });
+    });
+
+    html+=`</tbody></table></div></div>`;
+    return html;
+}
+
 /* =========================================================
    EJECUTIVO
    SOLO LOS 2 GRÁFICOS DEL CÓDIGO CORRECTO
@@ -657,6 +839,12 @@ function renderEjecutivo(rows){
 
     const tramos=["PREVENTIVO","TRAMO 1","TRAMO 2","TRAMO 3"];
     const labels=tramos.filter(x=>grupos.has(x));
+
+    const asesorGrupos=agrupar(rows,COL.ASESOR);
+    const ranking=[...asesorGrupos.entries()]
+        .map(([asesor,data])=>[asesor,calcularMetricas(data)])
+        .filter(([asesor,met])=>texto(asesor)!=="")
+        .sort((a,b)=>b[1].recuperado-a[1].recuperado);
 
     document.getElementById("ejecutivo").innerHTML=
         construirKPIs(m)+
@@ -679,7 +867,29 @@ function renderEjecutivo(rows){
                 </div>
             </div>
 
-        </div>`;
+        </div>
+
+        <div class="grid2">
+
+            <div class="card">
+                <h2 class="card-title">Con pago vs sin pago</h2>
+                <p class="card-sub">Con pago = MONTO_PAGO_DOLARIZADO &gt; 0.</p>
+                <div class="chart-box">
+                    <canvas id="chartPago"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Recuperado por ASESOR_ASIGN</h2>
+                <p class="card-sub">Ranking por monto recuperado.</p>
+                <div class="chart-box">
+                    <canvas id="chartAsesorRanking"></canvas>
+                </div>
+            </div>
+
+        </div>`+
+        tablaDetalleTramo(rows)+
+        tablaDetalleTramoTipo(rows);
 
     crearGraficoBarras(
         "chartTramo",
@@ -721,6 +931,18 @@ function renderEjecutivo(rows){
             }
         ],
         "pct"
+    );
+
+    crearGraficoDona(
+        "chartPago",
+        ["Con pago","Sin pago"],
+        [m.qConPago,m.qSinPago]
+    );
+
+    crearGraficoRanking(
+        "chartAsesorRanking",
+        ranking.map(x=>x[0]),
+        ranking.map(x=>x[1].recuperado)
     );
 }
 
@@ -1138,6 +1360,7 @@ function renderTramos(rows){
             <th>Tramo ejecutivo</th><th>Q_OPERATION</th><th>Q_UNICO</th><th>Cartera</th>
             <th>Recuperado</th><th>% Real</th><th>Meta</th><th>Brecha</th>
             <th>Recuperación objetivo</th><th>Diferencia recupero objetivo</th><th>Saldo</th>
+            <th>CD</th><th>NC</th><th>% CD</th>
             <th>Q_Promesas</th><th>Monto Promesas</th><th>% Efect. PDP</th>
         </tr>
         </thead>
@@ -1167,6 +1390,9 @@ function renderTramos(rows){
             <td>${dinero(objetivo)}</td>
             <td class="${diferencia>=0?"positive":"negative"}">${diferencia>=0?"+":""}${dinero(diferencia)}</td>
             <td>${dinero(m.saldo)}</td>
+            <td>${entero(m.contactosDirectos)}</td>
+            <td>${entero(m.noContactos)}</td>
+            <td>${porcentaje(m.porcentajeCD)}</td>
             <td>${entero(m.promesas)}</td>
             <td>${dinero(m.montoPromesas)}</td>
             <td>${porcentaje(m.efectPDP)}</td>
@@ -1192,6 +1418,9 @@ function renderTramos(rows){
             <td>${dinero(totalObjetivo)}</td>
             <td class="${totalDiferencia>=0?"positive":"negative"}">${totalDiferencia>=0?"+":""}${dinero(totalDiferencia)}</td>
             <td>${dinero(totalC-totalR)}</td>
+            <td>${entero(mt.contactosDirectos)}</td>
+            <td>${entero(mt.noContactos)}</td>
+            <td>${porcentaje(mt.porcentajeCD)}</td>
             <td>${entero(mt.promesas)}</td>
             <td>${dinero(mt.montoPromesas)}</td>
             <td>${porcentaje(mt.efectPDP)}</td>
@@ -1361,7 +1590,7 @@ async function cargarExcelAutomaticamente(){
             COL.OP,COL.CARTERA,COL.RECUPERADO,COL.TIPO,
             COL.GEST_CALL,COL.PROMESA_CALL,COL.CONTAC_CALL,
             COL.GEST_IVR,COL.GEST_EMAIL,COL.GEST_SMS,
-            COL.FLAG_PROMESA,COL.FLAG_SEGUIMIENTO,COL.ESTADO
+            COL.FLAG_PROMESA,COL.FLAG_SEGUIMIENTO,COL.NO_CONTACTO,COL.ESTADO
         ];
 
         const faltantes=obligatorias.filter(col=>!APP.headers.includes(col));
