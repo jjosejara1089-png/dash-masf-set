@@ -1050,6 +1050,12 @@ function tablaTipoCuota(rows){
                 <th>Intensidad General</th>
                 <th>Intensidad Marcador</th>
                 <th>Intensidad Marcador varios</th>
+                <th>CD</th>
+                <th>NC</th>
+                <th>% CD</th>
+                <th>Q_Promesas</th>
+                <th>Monto Promesas</th>
+                <th>% Efect. PDP</th>
             </tr>
         </thead>
         <tbody>`;
@@ -1074,11 +1080,17 @@ function tablaTipoCuota(rows){
             <td>${p.intensidadGeneral.toFixed(2)}</td>
             <td>${p.intensidadMarcador.toFixed(2)}</td>
             <td>${p.intensidadVarios.toFixed(2)}</td>
+            <td>${entero(m.contactosDirectos)}</td>
+            <td>${entero(m.noContactos)}</td>
+            <td>${porcentaje(m.porcentajeCD)}</td>
+            <td>${entero(m.promesas)}</td>
+            <td>${dinero(m.montoPromesas)}</td>
+            <td>${porcentaje(m.efectPDP)}</td>
         </tr>`;
     });
 
     if(!tipos.length){
-        html+=`<tr><td colspan="13">No existen registros para los filtros seleccionados.</td></tr>`;
+        html+=`<tr><td colspan="19">No existen registros para los filtros seleccionados.</td></tr>`;
     }
 
     html+=`</tbody></table></div>`;
@@ -1134,8 +1146,7 @@ function renderRecupero(rows){
                 Detalle monetario y operativo por tipo de cuota.
                 Los filtros de fecha y pago son independientes de los filtros globales.
             </p>
-            ${controlesTipoCuota()}
-            ${tablaTipoCuota(obtenerFiltradosTipoCuota(rows))}
+            ${tablaTipoCuota(rows)}
         </div>`;
 
     crearGraficoBarras(
