@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-
 <meta charset="UTF-8">
-
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Command Center MAF / Recupero</title>
 
+<!-- LIBRERÍAS -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
 
 <style>
 
 :root{
-
     --navy:#0B4168;
     --navy-dark:#083A5D;
     --blue:#168DD0;
@@ -32,7 +26,6 @@
     --red-light:#FFE4E8;
 
     --yellow:#F5A623;
-
     --purple:#7654D8;
 
     --bg:#EDF4F8;
@@ -42,9 +35,7 @@
     --text:#08395F;
     --muted:#647789;
 
-    --shadow:
-        0 3px 12px rgba(8,57,95,.08);
-
+    --shadow:0 3px 12px rgba(8,57,95,.08);
 }
 
 *{
@@ -52,392 +43,234 @@
 }
 
 body{
-
     margin:0;
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
+    font-family:Arial,Helvetica,sans-serif;
     background:var(--bg);
-
     color:var(--text);
-
 }
 
 button,
 select,
 input{
-
     font-family:inherit;
-
 }
 
 .app{
-
     display:flex;
-
     min-height:100vh;
-
 }
 
-/* =========================================================
-SIDEBAR
-========================================================= */
+/* SIDEBAR */
 
 .sidebar{
-
     width:238px;
-
-    background:
-        linear-gradient(
-            180deg,
-            var(--navy-dark),
-            var(--navy)
-        );
+    background:linear-gradient(
+        180deg,
+        var(--navy-dark),
+        var(--navy)
+    );
 
     color:white;
-
     position:fixed;
-
     left:0;
     top:0;
     bottom:0;
-
     padding:28px 10px;
-
     z-index:100;
-
 }
 
 .logo{
-
     font-size:31px;
-
     font-weight:900;
-
     line-height:.98;
-
     padding:0 12px 28px;
-
 }
 
 .logo small{
-
     display:block;
-
     font-size:15px;
-
     margin-top:16px;
-
     font-weight:700;
-
 }
 
 .nav-btn{
-
     width:100%;
-
     border:0;
-
     background:transparent;
-
     color:white;
-
     text-align:left;
-
     padding:15px 16px;
-
     margin:4px 0;
-
     border-radius:10px;
-
     font-size:15px;
-
     font-weight:800;
-
     cursor:pointer;
-
 }
 
 .nav-btn:hover{
-
     background:rgba(255,255,255,.10);
-
 }
 
 .nav-btn.active{
-
     background:#168DD0;
-
 }
 
-/* =========================================================
-MAIN
-========================================================= */
+/* MAIN */
 
 .main{
-
     margin-left:238px;
-
     width:calc(100% - 238px);
-
     padding:18px;
-
 }
 
-/* =========================================================
-HEADER
-========================================================= */
+/* HEADER */
 
 .header{
-
     background:white;
-
     border-radius:13px;
-
     padding:20px;
-
     box-shadow:var(--shadow);
-
     margin-bottom:14px;
-
 }
 
 .header-row{
-
     display:flex;
-
     align-items:center;
-
     justify-content:space-between;
-
     gap:20px;
-
 }
 
 .title h1{
-
     margin:0;
-
     font-size:25px;
-
     color:var(--navy-dark);
-
 }
 
 .title p{
-
     margin:5px 0 0;
-
     color:var(--muted);
-
     font-size:12px;
-
 }
 
 .file-area{
-
     display:flex;
-
     align-items:center;
-
     gap:10px;
-
 }
 
 .refresh-btn{
-
     border:0;
-
     background:var(--navy);
-
     color:white;
-
     border-radius:9px;
-
     padding:12px 18px;
-
     font-weight:800;
-
     cursor:pointer;
-
 }
 
 .refresh-btn:hover{
-
     background:var(--blue);
-
 }
 
 .file-name{
-
     font-size:12px;
-
     color:var(--muted);
-
 }
 
-/* =========================================================
-STATUS
-========================================================= */
+/* STATUS */
 
 .status{
-
     background:#E9FFF4;
-
     border:1px solid #71D8A8;
-
     color:#087942;
-
     border-radius:10px;
-
     padding:12px 15px;
-
     margin-bottom:14px;
-
     font-size:13px;
-
     font-weight:700;
-
 }
 
 .status.error{
-
     background:#FFF0F2;
-
     border-color:#F28A99;
-
     color:#B51E2B;
-
 }
 
-/* =========================================================
-FILTERS
-========================================================= */
+/* FILTERS */
 
 .filters{
-
     background:white;
-
     border-radius:13px;
-
     padding:15px;
 
     box-shadow:var(--shadow);
 
     display:grid;
-
-    grid-template-columns:
-        repeat(8,minmax(110px,1fr));
+    grid-template-columns:repeat(8,minmax(110px,1fr));
 
     gap:10px;
-
     margin-bottom:14px;
-
 }
 
 .filter label{
-
     display:block;
-
     font-size:10px;
-
     font-weight:900;
-
     color:#587087;
-
     margin-bottom:5px;
-
 }
 
 .filter select{
-
     width:100%;
-
     height:39px;
-
     border:1px solid #C8D8E5;
-
     border-radius:7px;
-
     padding:0 10px;
-
     background:white;
-
     color:#173B58;
-
 }
 
 .clear-btn{
-
     align-self:end;
-
     height:39px;
-
     border:0;
-
     border-radius:8px;
-
     background:#E8EEF3;
-
     color:#111;
-
     font-weight:800;
-
     cursor:pointer;
-
 }
 
-/* =========================================================
-MULTI SELECT
-========================================================= */
+/* MULTISELECT */
 
 .multi{
-
     position:relative;
-
 }
 
 .multi-button{
-
     width:100%;
-
     height:39px;
-
     border:1px solid #C8D8E5;
-
     border-radius:7px;
-
     background:white;
-
     text-align:left;
-
     padding:0 10px;
-
     cursor:pointer;
-
     color:#173B58;
-
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
 .multi-panel{
-
     display:none;
-
     position:absolute;
-
     left:0;
-
     right:0;
-
     top:43px;
 
     background:white;
-
     border:1px solid #CBD8E2;
-
     border-radius:8px;
 
     box-shadow:0 8px 25px rgba(0,0,0,.15);
@@ -445,558 +278,321 @@ MULTI SELECT
     z-index:500;
 
     padding:8px;
-
     max-height:230px;
-
     overflow:auto;
-
 }
 
 .multi.open .multi-panel{
-
     display:block;
-
 }
 
 .multi-option{
-
     display:flex;
-
     align-items:center;
-
     gap:7px;
-
     padding:6px;
-
     font-size:12px;
-
 }
 
 .multi-option input{
-
     width:15px;
-
     height:15px;
-
 }
 
-/* =========================================================
-VIEWS
-========================================================= */
+/* VIEWS */
 
 .view{
-
     display:none;
-
 }
 
 .view.active{
-
     display:block;
-
 }
 
-/* =========================================================
-CARDS
-========================================================= */
+/* CARDS */
 
 .card{
-
     background:white;
-
     border-radius:13px;
-
     box-shadow:var(--shadow);
-
     padding:14px;
-
     margin-bottom:14px;
-
     overflow:hidden;
-
 }
 
 .card-title{
-
     margin:0;
-
     font-size:17px;
-
     color:var(--navy-dark);
-
 }
 
 .card-sub{
-
     margin:5px 0 12px;
-
     font-size:11px;
-
     color:var(--muted);
-
 }
 
-/* =========================================================
-KPIs
-========================================================= */
+/* KPIS */
 
 .kpis{
-
     display:grid;
-
-    grid-template-columns:
-        repeat(6,1fr);
-
+    grid-template-columns:repeat(6,1fr);
     gap:12px;
-
     margin-bottom:14px;
-
 }
 
 .kpi{
-
     background:white;
-
     border-radius:12px;
-
     padding:15px;
-
     box-shadow:var(--shadow);
-
     border-left:5px solid var(--blue);
-
 }
 
 .kpi.green{
-
     border-left-color:var(--green);
-
 }
 
 .kpi.red{
-
     border-left-color:var(--red);
-
 }
 
 .kpi.purple{
-
     border-left-color:var(--purple);
-
 }
 
 .kpi-title{
-
     font-size:10px;
-
     font-weight:900;
-
     color:#60778B;
-
 }
 
 .kpi-value{
-
     font-size:27px;
-
     font-weight:900;
-
     color:var(--navy-dark);
-
     margin-top:9px;
-
 }
 
 .kpi-desc{
-
     font-size:9px;
-
     color:var(--muted);
-
     margin-top:5px;
-
 }
 
-/* =========================================================
-GRIDS
-========================================================= */
+/* GRIDS */
 
 .grid2{
-
     display:grid;
-
-    grid-template-columns:
-        1fr 1fr;
-
+    grid-template-columns:1fr 1fr;
     gap:14px;
-
 }
 
 .grid3{
-
     display:grid;
-
-    grid-template-columns:
-        repeat(3,1fr);
-
+    grid-template-columns:repeat(3,1fr);
     gap:14px;
-
 }
 
-/* =========================================================
-CHART
-========================================================= */
+/* CHART */
 
 .chart-box{
-
     height:330px;
-
     position:relative;
-
 }
 
-/* =========================================================
-TABLE
-========================================================= */
+/* TABLE */
 
 .table-wrap{
-
     width:100%;
-
     overflow:auto;
-
 }
 
 table{
-
     width:100%;
-
     border-collapse:collapse;
-
     font-size:11px;
-
     min-width:1050px;
-
 }
 
 thead th{
-
     background:var(--navy);
-
     color:white;
-
     padding:8px;
-
     text-align:center;
-
     white-space:nowrap;
-
     font-size:10px;
-
 }
 
 tbody td{
-
     padding:8px;
-
     border-bottom:1px solid #D9E3E9;
-
     text-align:center;
-
     white-space:nowrap;
-
 }
 
 tbody tr:nth-child(even){
-
     background:#F2F6F9;
-
 }
 
 tbody tr:hover{
-
     background:#E7F1F7;
-
 }
 
 .total-row{
-
     background:#DCEEF7 !important;
-
     font-weight:900;
-
 }
 
 .negative{
-
     color:var(--red);
-
     font-weight:900;
-
 }
 
 .positive{
-
     color:#008A57;
-
     font-weight:900;
-
 }
 
-/* =========================================================
-TIPO CUOTA CONTROLS
-========================================================= */
+/* TIPO CUOTA */
 
 .tipo-controls{
-
     display:flex;
-
     align-items:flex-end;
-
     justify-content:center;
-
     gap:35px;
-
     margin:10px 0 16px;
-
 }
 
 .tipo-block{
-
     display:flex;
-
     flex-direction:column;
-
     align-items:center;
-
 }
 
 .tipo-title{
-
     border:2px solid #222;
-
     padding:7px 22px;
-
     font-size:11px;
-
     font-weight:900;
-
     margin-bottom:9px;
-
 }
 
 .date-row{
-
     display:flex;
-
     align-items:center;
-
     gap:8px;
-
     font-size:10px;
-
     font-weight:900;
-
 }
 
 .date-row input{
-
     height:35px;
-
     border:1px solid #CBD9E2;
-
     border-radius:6px;
-
     padding:0 8px;
-
 }
 
 .payment-buttons{
-
     display:flex;
-
     gap:7px;
-
 }
 
 .payment-buttons button{
-
     border:1px solid #C6D4DE;
-
     background:#F7F9FA;
-
     padding:9px 17px;
-
     border-radius:7px;
-
     font-size:10px;
-
     font-weight:900;
-
     cursor:pointer;
-
 }
 
 .payment-buttons button.active{
-
     background:var(--navy);
-
     color:white;
-
 }
 
-/* =========================================================
-TRAMOS
-========================================================= */
-
-.tramo-card{
-
-    margin-bottom:14px;
-
-}
-
-.alert-red{
-
-    color:var(--red);
-
-    font-weight:900;
-
-}
-
-.alert-green{
-
-    color:#008A57;
-
-    font-weight:900;
-
-}
-
-/* =========================================================
-RESPONSIVE
-========================================================= */
+/* RESPONSIVE */
 
 @media(max-width:1300px){
 
     .filters{
-
-        grid-template-columns:
-            repeat(4,1fr);
-
+        grid-template-columns:repeat(4,1fr);
     }
 
     .kpis{
-
-        grid-template-columns:
-            repeat(3,1fr);
-
+        grid-template-columns:repeat(3,1fr);
     }
-
 }
 
 @media(max-width:850px){
 
     .sidebar{
-
         width:190px;
-
     }
 
     .main{
-
         margin-left:190px;
-
         width:calc(100% - 190px);
-
     }
 
     .grid2,
     .grid3{
-
         grid-template-columns:1fr;
-
     }
 
     .filters{
-
-        grid-template-columns:
-            repeat(2,1fr);
-
+        grid-template-columns:repeat(2,1fr);
     }
 
     .kpis{
-
-        grid-template-columns:
-            repeat(2,1fr);
-
+        grid-template-columns:repeat(2,1fr);
     }
-
 }
 
 @media(max-width:600px){
 
     .sidebar{
-
         display:none;
-
     }
 
     .main{
-
         margin-left:0;
-
         width:100%;
-
         padding:8px;
-
     }
 
     .filters{
-
         grid-template-columns:1fr;
-
     }
 
     .kpis{
-
         grid-template-columns:1fr;
-
     }
 
     .header-row{
-
         flex-direction:column;
-
         align-items:flex-start;
-
     }
 
     .tipo-controls{
-
         flex-direction:column;
-
     }
-
 }
 
 </style>
-
 </head>
-
 
 <body>
 
-
 <div class="app">
 
-
-<!-- =========================================================
-SIDEBAR
-========================================================= -->
+<!-- SIDEBAR -->
 
 <aside class="sidebar">
 
     <div class="logo">
-
         MAF /
         <br>
         RECUPERO
@@ -1004,72 +600,37 @@ SIDEBAR
         <small>
             Command Center
         </small>
-
     </div>
 
-
-    <button
-        class="nav-btn active"
-        data-view="ejecutivo">
-
+    <button class="nav-btn active" data-view="ejecutivo">
         📊 Ejecutivo
-
     </button>
 
-
-    <button
-        class="nav-btn"
-        data-view="recupero">
-
+    <button class="nav-btn" data-view="recupero">
         💰 Recupero
-
     </button>
 
-
-    <button
-        class="nav-btn"
-        data-view="gestion">
-
+    <button class="nav-btn" data-view="gestion">
         📞 Gestión
-
     </button>
 
-
-    <button
-        class="nav-btn"
-        data-view="cartera">
-
+    <button class="nav-btn" data-view="cartera">
         📁 Cartera / Riesgo
-
     </button>
 
-
-    <button
-        class="nav-btn"
-        data-view="asesores">
-
+    <button class="nav-btn" data-view="asesores">
         👥 Asesores
-
     </button>
 
-
-    <button
-        class="nav-btn"
-        data-view="tramos">
-
+    <button class="nav-btn" data-view="tramos">
         🎯 Tramos -10 a 90
-
     </button>
 
 </aside>
 
-
-<!-- =========================================================
-MAIN
-========================================================= -->
+<!-- MAIN -->
 
 <main class="main">
-
 
 <header class="header">
 
@@ -1087,7 +648,6 @@ MAIN
 
         </div>
 
-
         <div class="file-area">
 
             <button
@@ -1097,7 +657,6 @@ MAIN
                 ↻ Actualizar datos
 
             </button>
-
 
             <span
                 id="fileName"
@@ -1113,90 +672,54 @@ MAIN
 
 </header>
 
-
-<div
-    id="status"
-    class="status">
-
+<div id="status" class="status">
     Cargando automáticamente maf_2_v5.xlsx...
-
 </div>
 
-
-<!-- =========================================================
-FILTROS GLOBALES
-========================================================= -->
+<!-- FILTROS -->
 
 <div class="filters">
 
-
     <div class="filter">
 
-        <label>
-            MES
-        </label>
+        <label>MES</label>
 
         <select id="fMes">
-
-            <option value="__ALL__">
-                Todos
-            </option>
-
+            <option value="__ALL__">Todos</option>
         </select>
 
     </div>
 
-
     <div class="filter">
 
-        <label>
-            CICLO2
-        </label>
+        <label>CICLO2</label>
 
         <select id="fCiclo">
-
-            <option value="__ALL__">
-                Todos
-            </option>
-
+            <option value="__ALL__">Todos</option>
         </select>
 
     </div>
 
-
     <div class="filter">
 
-        <label>
-            TRAMO CARTERA
-        </label>
+        <label>TRAMO CARTERA</label>
 
         <select id="fTramo">
-
-            <option value="__ALL__">
-                Todos
-            </option>
-
+            <option value="__ALL__">Todos</option>
         </select>
 
     </div>
 
-
     <div class="filter">
 
-        <label>
-            ASESOR ASIGN
-        </label>
+        <label>ASESOR ASIGN</label>
 
-        <div
-            id="asesorMulti"
-            class="multi">
+        <div id="asesorMulti" class="multi">
 
             <button
                 type="button"
                 class="multi-button">
-
                 Todos
-
             </button>
 
             <div
@@ -1208,76 +731,46 @@ FILTROS GLOBALES
 
     </div>
 
-
     <div class="filter">
 
-        <label>
-            CALIFICACION SBS
-        </label>
+        <label>CALIFICACION SBS</label>
 
         <select id="fSbs">
-
-            <option value="__ALL__">
-                Todos
-            </option>
-
+            <option value="__ALL__">Todos</option>
         </select>
 
     </div>
 
-
     <div class="filter">
 
-        <label>
-            PAGO / RESPP
-        </label>
+        <label>PAGO / RESPP</label>
 
         <select id="fPago">
-
-            <option value="__ALL__">
-                Todos
-            </option>
-
+            <option value="__ALL__">Todos</option>
         </select>
 
     </div>
 
-
     <div class="filter">
 
-        <label>
-            TIPO CUOTA
-        </label>
+        <label>TIPO CUOTA</label>
 
         <select id="fTipo">
-
-            <option value="__ALL__">
-                Todos
-            </option>
-
+            <option value="__ALL__">Todos</option>
         </select>
 
     </div>
 
-
-    <!-- ESTADO MULTISELECCIÓN -->
-
     <div class="filter">
 
-        <label>
-            ESTADO
-        </label>
+        <label>ESTADO</label>
 
-        <div
-            id="estadoMulti"
-            class="multi">
+        <div id="estadoMulti" class="multi">
 
             <button
                 type="button"
                 class="multi-button">
-
                 Todos
-
             </button>
 
             <div
@@ -1289,178 +782,122 @@ FILTROS GLOBALES
 
     </div>
 
-
     <button
         id="clearBtn"
         class="clear-btn">
-
         Limpiar
-
     </button>
 
 </div>
 
+<!-- VISTAS -->
 
-<!-- =========================================================
-VIEWS
-========================================================= -->
+<div id="ejecutivo" class="view active"></div>
 
-<div
-    id="ejecutivo"
-    class="view active">
-</div>
+<div id="recupero" class="view"></div>
 
+<div id="gestion" class="view"></div>
 
-<div
-    id="recupero"
-    class="view">
-</div>
+<div id="cartera" class="view"></div>
 
+<div id="asesores" class="view"></div>
 
-<div
-    id="gestion"
-    class="view">
-</div>
-
-
-<div
-    id="cartera"
-    class="view">
-</div>
-
-
-<div
-    id="asesores"
-    class="view">
-</div>
-
-
-<div
-    id="tramos"
-    class="view">
-</div>
-
+<div id="tramos" class="view"></div>
 
 </main>
 
 </div>
 
-
 <script>
 
 /* =========================================================
-ESTADO DE LA APLICACIÓN
+   CONFIGURACIÓN
 ========================================================= */
+
+const ARCHIVO_EXCEL = "maf_2_v5.xlsx";
 
 const APP = {
 
-    data:[],
+    data: [],
 
-    headers:[],
+    headers: [],
 
-    charts:{},
+    charts: {},
 
-    view:"ejecutivo",
+    view: "ejecutivo",
 
-    selectedAsesores:new Set(),
+    selectedAsesores: new Set(),
 
-    selectedEstados:new Set(),
+    selectedEstados: new Set(),
 
-    tipoFechaDesde:"",
+    tipoFechaDesde: "",
 
-    tipoFechaHasta:"",
+    tipoFechaHasta: "",
 
-    tipoPagoFiltro:"TODOS"
+    tipoPagoFiltro: "TODOS",
+
+    iniciado: false
 
 };
 
 
 /* =========================================================
-COLUMNAS REALES
+   COLUMNAS
 ========================================================= */
 
 const COL = {
 
-    MES:
-        "MES",
+    MES:"MES",
 
-    CICLO:
-        "CICLO2",
+    CICLO:"CICLO2",
 
-    TRAMO:
-        "TRAMO_CARTERA",
+    TRAMO:"TRAMO_CARTERA",
 
-    ASESOR:
-        "ASESOR_ASIGN",
+    ASESOR:"ASESOR_ASIGN",
 
-    SBS:
-        "CALIFICACION_SBS",
+    SBS:"CALIFICACION_SBS",
 
-    PAGO:
-        "RESPP",
+    PAGO:"RESPP",
 
-    ESTADO:
-        "ESTADO",
+    ESTADO:"ESTADO",
 
-    TIPO:
-        "TIPO_CUOTA",
+    TIPO:"TIPO_CUOTA",
 
-    OP:
-        "OPERACION",
+    OP:"OPERACION",
 
-    SOCIO:
-        "UNICO SOCIO",
+    SOCIO:"UNICO SOCIO",
 
-    CARTERA:
-        "CUOTA_DOLARIZADA",
+    CARTERA:"CUOTA_DOLARIZADA",
 
-    RECUPERADO:
-        "MONTO_PAGO_DOLARIZADO",
+    RECUPERADO:"MONTO_PAGO_DOLARIZADO",
 
-    FECHA_PAGO:
-        "FECHA_PAGO",
+    FECHA_PAGO:"FECHA_PAGO",
 
-    FECHA_GESTION:
-        "FECHA_GESTION",
+    FECHA_GESTION:"FECHA_GESTION",
 
-    GEST_CALL:
-        "CANT_GEST_CALL",
+    GEST_CALL:"CANT_GEST_CALL",
 
-    PROMESA_CALL:
-        "CANT_PROMESA_CALL",
+    PROMESA_CALL:"CANT_PROMESA_CALL",
 
-    CONTAC_CALL:
-        "CANT_CONTAC_CALL",
+    CONTAC_CALL:"CANT_CONTAC_CALL",
 
-    GEST_IVR:
-        "CANT_GEST_IVR",
+    GEST_IVR:"CANT_GEST_IVR",
 
-    GEST_EMAIL:
-        "CANT_GEST_EMAIL",
+    GEST_EMAIL:"CANT_GEST_EMAIL",
 
-    GEST_SMS:
-        "CANT_GEST_SMS",
+    GEST_SMS:"CANT_GEST_SMS",
 
-    FLAG_PROMESA:
-        "FLAG_PROMESA",
+    FLAG_PROMESA:"FLAG_PROMESA",
 
-    FLAG_SEGUIMIENTO:
-        "FLAG_SEGUIMIENTO",
+    FLAG_SEGUIMIENTO:"FLAG_SEGUIMIENTO",
 
-    CONTACTO:
-        "CONTACTO",
-
-    SIN_PAGO:
-        "SIN PAGO",
-
-    CON_PAGO:
-        "CON PAGO"
+    CONTACTO:"CONTACTO"
 
 };
 
 
 /* =========================================================
-UTILIDADES
+   UTILIDADES
 ========================================================= */
 
 function texto(v){
@@ -1468,9 +905,7 @@ function texto(v){
     if(v === null || v === undefined)
         return "";
 
-    return String(v)
-        .trim();
-
+    return String(v).trim();
 }
 
 
@@ -1482,7 +917,6 @@ function normalizar(v){
         .replace(/\s+/g," ")
         .trim()
         .toUpperCase();
-
 }
 
 
@@ -1502,7 +936,6 @@ function numero(v){
     const n = Number(s);
 
     return Number.isFinite(n) ? n : 0;
-
 }
 
 
@@ -1510,7 +943,6 @@ function entero(v){
 
     return Math.round(numero(v))
         .toLocaleString("en-US");
-
 }
 
 
@@ -1524,7 +956,6 @@ function dinero(v){
                 maximumFractionDigits:2
             }
         );
-
 }
 
 
@@ -1537,7 +968,6 @@ function porcentaje(v){
             maximumFractionDigits:1
         }
     ) + "%";
-
 }
 
 
@@ -1549,27 +979,54 @@ function escapeHTML(v){
         .replace(/>/g,"&gt;")
         .replace(/"/g,"&quot;")
         .replace(/'/g,"&#039;");
+}
+
+
+/* =========================================================
+   RESOLUCIÓN ROBUSTA DE COLUMNAS
+========================================================= */
+
+let COLUMN_MAP = {};
+
+
+function construirMapaColumnas(headers){
+
+    COLUMN_MAP = {};
+
+    headers.forEach(header=>{
+
+        COLUMN_MAP[
+            normalizar(header)
+        ] = header;
+
+    });
 
 }
 
 
 function valor(row,col){
 
-    return row[col];
+    const real = COLUMN_MAP[normalizar(col)];
 
+    if(real !== undefined)
+        return row[real];
+
+    return undefined;
 }
 
 
+/* =========================================================
+   FECHAS
+========================================================= */
+
 function fechaNormalizada(v){
 
-    if(v instanceof Date &&
-       !isNaN(v))
+    if(v instanceof Date && !isNaN(v))
         return v;
 
     if(typeof v === "number"){
 
-        const d =
-            XLSX.SSF.parse_date_code(v);
+        const d = XLSX.SSF.parse_date_code(v);
 
         if(d){
 
@@ -1585,37 +1042,35 @@ function fechaNormalizada(v){
 
     if(typeof v === "string"){
 
-        const s=v.trim();
+        const s = v.trim();
 
         if(!s)
             return null;
 
-        const iso =
-            s.match(
-                /^(\d{4})-(\d{2})-(\d{2})/
-            );
+        let m = s.match(
+            /^(\d{4})-(\d{2})-(\d{2})/
+        );
 
-        if(iso){
+        if(m){
 
             return new Date(
-                Number(iso[1]),
-                Number(iso[2])-1,
-                Number(iso[3])
+                Number(m[1]),
+                Number(m[2])-1,
+                Number(m[3])
             );
 
         }
 
-        const lat =
-            s.match(
-                /^(\d{2})\/(\d{2})\/(\d{4})/
-            );
+        m = s.match(
+            /^(\d{2})\/(\d{2})\/(\d{4})/
+        );
 
-        if(lat){
+        if(m){
 
             return new Date(
-                Number(lat[3]),
-                Number(lat[2])-1,
-                Number(lat[1])
+                Number(m[3]),
+                Number(m[2])-1,
+                Number(m[1])
             );
 
         }
@@ -1623,48 +1078,37 @@ function fechaNormalizada(v){
     }
 
     return null;
-
 }
 
 
 function fechaISO(v){
 
-    const d=fechaNormalizada(v);
+    const d = fechaNormalizada(v);
 
     if(!d)
         return "";
 
-    const y=d.getFullYear();
-
-    const m=
-        String(
-            d.getMonth()+1
-        ).padStart(2,"0");
-
-    const day=
-        String(
-            d.getDate()
-        ).padStart(2,"0");
-
-    return `${y}-${m}-${day}`;
-
+    return [
+        d.getFullYear(),
+        String(d.getMonth()+1).padStart(2,"0"),
+        String(d.getDate()).padStart(2,"0")
+    ].join("-");
 }
 
 
 /* =========================================================
-AGRUPACIÓN
+   AGRUPACIÓN
 ========================================================= */
 
 function agrupar(rows,col){
 
-    const map=new Map();
+    const map = new Map();
 
     rows.forEach(row=>{
 
-        const key=
-            texto(
-                valor(row,col)
-            );
+        const key = texto(
+            valor(row,col)
+        );
 
         if(!map.has(key))
             map.set(key,[]);
@@ -1674,87 +1118,101 @@ function agrupar(rows,col){
     });
 
     return map;
-
 }
 
 
 /* =========================================================
-MÉTRICAS GENERALES
+   Q_OPERATION
+   CORRECCIÓN PRINCIPAL
+========================================================= */
+
+function contarOperacionesUnicas(rows){
+
+    const operaciones = new Set();
+
+    rows.forEach(row=>{
+
+        const op = texto(
+            valor(row,COL.OP)
+        );
+
+        if(op !== "")
+            operaciones.add(op);
+
+    });
+
+    return operaciones.size;
+}
+
+
+/* =========================================================
+   MÉTRICAS
 ========================================================= */
 
 function calcularMetricas(rows){
 
-    let cartera=0;
+    let cartera = 0;
 
-    let recuperado=0;
+    let recuperado = 0;
 
-    let qOperation=0;
+    let qConPago = 0;
 
-    let qUnico=0;
+    let qSinPago = 0;
 
-    let qConPago=0;
+    let qUnico = 0;
 
-    let qSinPago=0;
+    let seguimientos = 0;
 
-    let seguimientos=0;
+    let promesas = 0;
 
-    let promesas=0;
+    let contactosDirectos = 0;
 
-    let contactosDirectos=0;
+    let montoPromesas = 0;
 
-    let montoPromesas=0;
+    let promesasCumplidas = 0;
 
-    let promesasCumplidas=0;
+
+    /*
+       IMPORTANTE:
+
+       Q_OPERATION =
+       cantidad de OPERACION únicas.
+    */
+
+    const qOperation =
+        contarOperacionesUnicas(rows);
 
 
     rows.forEach(row=>{
 
-        if(
-            texto(
-                valor(row,COL.OP)
-            ) !== ""
-        )
-            qOperation++;
+        qUnico += numero(
+            valor(row,COL.SOCIO)
+        );
+
+        cartera += numero(
+            valor(row,COL.CARTERA)
+        );
 
 
-        qUnico +=
-            numero(
-                valor(row,COL.SOCIO)
-            );
-
-
-        cartera +=
-            numero(
-                valor(row,COL.CARTERA)
-            );
-
-
-        const pago=
-            numero(
-                valor(row,COL.RECUPERADO)
-            );
-
+        const pago = numero(
+            valor(row,COL.RECUPERADO)
+        );
 
         recuperado += pago;
 
 
         if(pago > 0)
             qConPago++;
-
         else
             qSinPago++;
 
 
-        seguimientos +=
-            numero(
-                valor(
-                    row,
-                    COL.FLAG_SEGUIMIENTO
-                )
-            );
+        seguimientos += numero(
+            valor(row,COL.FLAG_SEGUIMIENTO)
+        );
 
 
-        const flagPromesa=
+        const flagPromesa =
             numero(
                 valor(
                     row,
@@ -1763,26 +1221,13 @@ function calcularMetricas(rows){
             );
 
 
-        promesas +=
-            flagPromesa;
+        promesas += flagPromesa;
 
 
-        contactosDirectos +=
-            numero(
-                valor(
-                    row,
-                    COL.CONTACTO
-                )
-            );
+        contactosDirectos += numero(
+            valor(row,COL.CONTACTO)
+        );
 
-
-        /*
-        Monto Promesas:
-
-        MONTO_PAGO_DOLARIZADO
-        solamente cuando
-        FLAG_PROMESA = 1
-        */
 
         if(flagPromesa > 0){
 
@@ -1802,8 +1247,7 @@ function calcularMetricas(rows){
 
         recuperado,
 
-        saldo:
-            cartera-recuperado,
+        saldo:cartera-recuperado,
 
         qOperation,
 
@@ -1825,20 +1269,18 @@ function calcularMetricas(rows){
 
         porcentajeRecuperacion:
             cartera > 0
-                ? recuperado/cartera*100
-                : 0,
+            ? recuperado/cartera*100
+            : 0,
 
         porcentajeContactoDirecto:
             qOperation > 0
-                ? contactosDirectos/
-                  qOperation*100
-                : 0,
+            ? contactosDirectos/qOperation*100
+            : 0,
 
         efectPDP:
             promesas > 0
-                ? promesasCumplidas/
-                  promesas*100
-                : 0
+            ? promesasCumplidas/promesas*100
+            : 0
 
     };
 
@@ -1846,160 +1288,137 @@ function calcularMetricas(rows){
 
 
 /* =========================================================
-PRODUCTIVIDAD / INTENSIDAD
+   PRODUCTIVIDAD / INTENSIDAD
 ========================================================= */
 
 function calcularProductividad(rows){
 
-    let cobertura=0;
+    let cobertura = 0;
 
-    let promesa=0;
+    let promesa = 0;
 
-    let contacto=0;
+    let contacto = 0;
 
-    let ivr=0;
+    let ivr = 0;
 
-    let email=0;
+    let email = 0;
 
-    let sms=0;
-
-    let operaciones=0;
+    let sms = 0;
 
 
     rows.forEach(row=>{
 
-        if(
-            texto(
-                valor(row,COL.OP)
-            ) !== ""
-        )
-            operaciones++;
+        cobertura += numero(
+            valor(row,COL.GEST_CALL)
+        );
 
+        promesa += numero(
+            valor(row,COL.PROMESA_CALL)
+        );
 
-        cobertura +=
-            numero(
-                valor(
-                    row,
-                    COL.GEST_CALL
-                )
-            );
+        contacto += numero(
+            valor(row,COL.CONTAC_CALL)
+        );
 
+        ivr += numero(
+            valor(row,COL.GEST_IVR)
+        );
 
-        promesa +=
-            numero(
-                valor(
-                    row,
-                    COL.PROMESA_CALL
-                )
-            );
+        email += numero(
+            valor(row,COL.GEST_EMAIL)
+        );
 
-
-        contacto +=
-            numero(
-                valor(
-                    row,
-                    COL.CONTAC_CALL
-                )
-            );
-
-
-        ivr +=
-            numero(
-                valor(
-                    row,
-                    COL.GEST_IVR
-                )
-            );
-
-
-        email +=
-            numero(
-                valor(
-                    row,
-                    COL.GEST_EMAIL
-                )
-            );
-
-
-        sms +=
-            numero(
-                valor(
-                    row,
-                    COL.GEST_SMS
-                )
-            );
+        sms += numero(
+            valor(row,COL.GEST_SMS)
+        );
 
     });
 
 
-    const varios=
-        promesa+
-        contacto+
-        ivr+
-        email+
+    /*
+       Q_OPERATION CORREGIDO
+
+       NO usamos rows.length
+
+       NO contamos registros repetidos.
+
+       Usamos operaciones únicas.
+    */
+
+    const operaciones =
+        contarOperacionesUnicas(rows);
+
+
+    /*
+       INTENSIDAD MARCADOR
+
+       SUM(CANT_GEST_CALL)
+       /
+       Q_OPERATION
+    */
+
+    const intensidadMarcador =
+        operaciones > 0
+        ? cobertura / operaciones
+        : 0;
+
+
+    /*
+       INTENSIDAD MARCADOR VARIOS
+
+       (
+          CANT_PROMESA_CALL
+          +
+          CANT_CONTAC_CALL
+          +
+          CANT_GEST_IVR
+          +
+          CANT_GEST_EMAIL
+          +
+          CANT_GEST_SMS
+       )
+       /
+       Q_OPERATION
+    */
+
+    const varios =
+        promesa +
+        contacto +
+        ivr +
+        email +
         sms;
 
 
-    /*
-    INTENSIDAD MARCADOR
-
-    CANT_GEST_CALL /
-    Q_OPERATION
-    */
-
-    const intensidadMarcador=
+    const intensidadVarios =
         operaciones > 0
-            ? cobertura/
-              operaciones
-            : 0;
+        ? varios / operaciones
+        : 0;
 
 
     /*
-    INTENSIDAD MARCADOR VARIOS
+       INTENSIDAD GENERAL
 
-    (
-      CANT_PROMESA_CALL
-      +
-      CANT_CONTAC_CALL
-      +
-      CANT_GEST_IVR
-      +
-      CANT_GEST_EMAIL
-      +
-      CANT_GEST_SMS
-    )
-    /
-    Q_OPERATION
+       (
+          CANT_GEST_CALL
+          +
+          CANT_PROMESA_CALL
+          +
+          CANT_CONTAC_CALL
+          +
+          CANT_GEST_IVR
+          +
+          CANT_GEST_EMAIL
+          +
+          CANT_GEST_SMS
+       )
+       /
+       Q_OPERATION
     */
 
-    const intensidadVarios=
+    const intensidadGeneral =
         operaciones > 0
-            ? varios/
-              operaciones
-            : 0;
-
-
-    /*
-    INTENSIDAD GENERAL
-
-    CANT_GEST_CALL
-    +
-    VARIOS
-
-    /
-    Q_OPERATION
-    */
-
-    const intensidadGeneral=
-        operaciones > 0
-            ?
-            (
-                cobertura+
-                varios
-            )/
-            operaciones
-            :
-            0;
+        ? (cobertura + varios) / operaciones
+        : 0;
 
 
     return {
@@ -2020,144 +1439,87 @@ function calcularProductividad(rows){
 
 
 /* =========================================================
-FILTROS
+   FILTROS
 ========================================================= */
 
 function obtenerFiltrados(){
 
-    const mes=
-        document.getElementById(
-            "fMes"
-        ).value;
+    const mes =
+        document.getElementById("fMes").value;
 
+    const ciclo =
+        document.getElementById("fCiclo").value;
 
-    const ciclo=
-        document.getElementById(
-            "fCiclo"
-        ).value;
+    const tramo =
+        document.getElementById("fTramo").value;
 
+    const sbs =
+        document.getElementById("fSbs").value;
 
-    const tramo=
-        document.getElementById(
-            "fTramo"
-        ).value;
+    const pago =
+        document.getElementById("fPago").value;
 
-
-    const sbs=
-        document.getElementById(
-            "fSbs"
-        ).value;
-
-
-    const pago=
-        document.getElementById(
-            "fPago"
-        ).value;
-
-
-    const tipo=
-        document.getElementById(
-            "fTipo"
-        ).value;
+    const tipo =
+        document.getElementById("fTipo").value;
 
 
     return APP.data.filter(row=>{
 
         if(
-            mes!=="__ALL__" &&
-            texto(
-                valor(
-                    row,
-                    COL.MES
-                )
-            ) !== mes
+            mes !== "__ALL__" &&
+            texto(valor(row,COL.MES)) !== mes
         )
             return false;
 
 
         if(
-            ciclo!=="__ALL__" &&
-            texto(
-                valor(
-                    row,
-                    COL.CICLO
-                )
-            ) !== ciclo
+            ciclo !== "__ALL__" &&
+            texto(valor(row,COL.CICLO)) !== ciclo
         )
             return false;
 
 
         if(
-            tramo!=="__ALL__" &&
-            texto(
-                valor(
-                    row,
-                    COL.TRAMO
-                )
-            ) !== tramo
+            tramo !== "__ALL__" &&
+            texto(valor(row,COL.TRAMO)) !== tramo
         )
             return false;
 
 
         if(
-            sbs!=="__ALL__" &&
-            texto(
-                valor(
-                    row,
-                    COL.SBS
-                )
-            ) !== sbs
+            sbs !== "__ALL__" &&
+            texto(valor(row,COL.SBS)) !== sbs
         )
             return false;
 
 
         if(
-            pago!=="__ALL__" &&
-            texto(
-                valor(
-                    row,
-                    COL.PAGO
-                )
-            ) !== pago
+            pago !== "__ALL__" &&
+            texto(valor(row,COL.PAGO)) !== pago
         )
             return false;
 
 
         if(
-            tipo!=="__ALL__" &&
-            texto(
-                valor(
-                    row,
-                    COL.TIPO
-                )
-            ) !== tipo
+            tipo !== "__ALL__" &&
+            texto(valor(row,COL.TIPO)) !== tipo
         )
             return false;
 
 
         if(
-            APP.selectedAsesores.size>0 &&
+            APP.selectedAsesores.size > 0 &&
             !APP.selectedAsesores.has(
-                texto(
-                    valor(
-                        row,
-                        COL.ASESOR
-                    )
-                )
+                texto(valor(row,COL.ASESOR))
             )
         )
             return false;
 
 
         if(
-            APP.selectedEstados.size>0 &&
+            APP.selectedEstados.size > 0 &&
             !APP.selectedEstados.has(
-                texto(
-                    valor(
-                        row,
-                        COL.ESTADO
-                    )
-                )
+                texto(valor(row,COL.ESTADO))
             )
         )
             return false;
@@ -2171,63 +1533,52 @@ function obtenerFiltrados(){
 
 
 /* =========================================================
-CARGAR SELECT
+   SELECTS
 ========================================================= */
 
 function cargarSelect(id,col){
 
-    const select=
+    const select =
         document.getElementById(id);
 
     if(!select)
         return;
 
 
-    const valores=
-        [
-            ...new Set(
-                APP.data
-                .map(
-                    row =>
-                        texto(
-                            valor(row,col)
-                        )
-                )
-                .filter(Boolean)
+    const valores =
+        [...new Set(
+
+            APP.data
+            .map(row =>
+                texto(valor(row,col))
             )
-        ]
+            .filter(Boolean)
+
+        )]
         .sort(
             (a,b)=>
                 a.localeCompare(
                     b,
                     "es",
-                    {
-                        numeric:true
-                    }
+                    {numeric:true}
                 )
         );
 
 
-    select.innerHTML=
-        `<option value="__ALL__">
-            Todos
-        </option>`;
+    select.innerHTML =
+        '<option value="__ALL__">Todos</option>';
 
 
     valores.forEach(v=>{
 
-        const option=
-            document.createElement(
-                "option"
-            );
+        const option =
+            document.createElement("option");
 
-        option.value=v;
+        option.value = v;
 
-        option.textContent=v;
+        option.textContent = v;
 
-        select.appendChild(
-            option
-        );
+        select.appendChild(option);
 
     });
 
@@ -2235,7 +1586,7 @@ function cargarSelect(id,col){
 
 
 /* =========================================================
-MULTI SELECT
+   MULTI SELECT
 ========================================================= */
 
 function construirMultiSelect(
@@ -2245,76 +1596,58 @@ function construirMultiSelect(
     selectedSet
 ){
 
-    const container=
-        document.getElementById(
-            containerId
-        );
+    const container =
+        document.getElementById(containerId);
 
-    const panel=
-        document.getElementById(
-            panelId
-        );
-
+    const panel =
+        document.getElementById(panelId);
 
     if(!container || !panel)
         return;
 
 
-    const button=
+    const button =
         container.querySelector(
             ".multi-button"
         );
 
 
-    const valores=
-        [
-            ...new Set(
-                APP.data
-                .map(
-                    row =>
-                        texto(
-                            valor(
-                                row,
-                                col
-                            )
-                        )
-                )
-                .filter(Boolean)
+    const valores =
+        [...new Set(
+
+            APP.data
+            .map(row =>
+                texto(valor(row,col))
             )
-        ]
+            .filter(Boolean)
+
+        )]
         .sort(
             (a,b)=>
-                a.localeCompare(
-                    b,
-                    "es"
-                )
+                a.localeCompare(b,"es")
         );
 
 
-    panel.innerHTML="";
+    panel.innerHTML = "";
 
 
     valores.forEach(v=>{
 
-        const label=
-            document.createElement(
-                "label"
-            );
+        const label =
+            document.createElement("label");
 
-        label.className=
+        label.className =
             "multi-option";
 
 
-        const input=
-            document.createElement(
-                "input"
-            );
+        const input =
+            document.createElement("input");
 
-        input.type="checkbox";
+        input.type = "checkbox";
 
-        input.value=v;
+        input.value = v;
 
-        input.checked=
+        input.checked =
             selectedSet.has(v);
 
 
@@ -2324,7 +1657,6 @@ function construirMultiSelect(
 
                 if(input.checked)
                     selectedSet.add(v);
-
                 else
                     selectedSet.delete(v);
 
@@ -2333,7 +1665,6 @@ function construirMultiSelect(
                     button,
                     selectedSet
                 );
-
 
                 render();
 
@@ -2344,38 +1675,30 @@ function construirMultiSelect(
         label.appendChild(input);
 
 
-        const span=
-            document.createElement(
-                "span"
-            );
+        const span =
+            document.createElement("span");
 
-        span.textContent=v;
-
+        span.textContent = v;
 
         label.appendChild(span);
-
 
         panel.appendChild(label);
 
     });
 
 
-    button.onclick=
-        e=>{
+    button.onclick = e=>{
 
-            e.stopPropagation();
+        e.stopPropagation();
 
-            container.classList.toggle(
-                "open"
-            );
+        container.classList.toggle("open");
 
-        };
+    };
 
 
-    panel.onclick=
-        e=>{
-            e.stopPropagation();
-        };
+    panel.onclick = e=>{
+        e.stopPropagation();
+    };
 
 
     actualizarMultiButton(
@@ -2393,17 +1716,16 @@ function actualizarMultiButton(
 
     if(!set.size){
 
-        button.textContent=
-            "Todos";
+        button.textContent = "Todos";
 
         return;
 
     }
 
 
-    if(set.size===1){
+    if(set.size === 1){
 
-        button.textContent=
+        button.textContent =
             [...set][0];
 
         return;
@@ -2411,14 +1733,14 @@ function actualizarMultiButton(
     }
 
 
-    button.textContent=
+    button.textContent =
         `${set.size} seleccionados`;
 
 }
 
 
 /* =========================================================
-CARGAR FILTROS
+   FILTROS
 ========================================================= */
 
 function cargarFiltros(){
@@ -2473,7 +1795,7 @@ function cargarFiltros(){
 
 
 /* =========================================================
-KPI CARDS
+   KPIS
 ========================================================= */
 
 function construirKPIs(m){
@@ -2563,7 +1885,7 @@ function construirKPIs(m){
             </div>
 
             <div class="kpi-desc">
-                COUNT(OPERACION)
+                OPERACIONES ÚNICAS
             </div>
 
         </div>
@@ -2581,11 +1903,12 @@ function construirKPIs(m){
 
             <div class="kpi-desc">
                 ${
-                    m.qOperation>0
+                    m.qOperation > 0
                     ?
                     porcentaje(
-                        m.qSinPago/
-                        m.qOperation*100
+                        m.qSinPago /
+                        m.qOperation *
+                        100
                     )
                     :
                     "0.0%"
@@ -2602,7 +1925,7 @@ function construirKPIs(m){
 
 
 /* =========================================================
-CHART
+   CHARTS
 ========================================================= */
 
 function destruirChart(id){
@@ -2628,15 +1951,14 @@ function crearGraficoBarras(
     destruirChart(id);
 
 
-    const canvas=
+    const canvas =
         document.getElementById(id);
-
 
     if(!canvas)
         return;
 
 
-    APP.charts[id]=
+    APP.charts[id] =
         new Chart(
             canvas,
             {
@@ -2675,26 +1997,17 @@ function crearGraficoBarras(
                                 weight:"bold"
                             },
 
-                            formatter:
-                                value=>{
+                            formatter:value=>{
 
-                                    if(
-                                        formato
-                                        ===
-                                        "money"
-                                    )
-                                        return dinero(value);
+                                if(formato === "money")
+                                    return dinero(value);
 
-                                    if(
-                                        formato
-                                        ===
-                                        "pct"
-                                    )
-                                        return porcentaje(value);
+                                if(formato === "pct")
+                                    return porcentaje(value);
 
-                                    return entero(value);
+                                return entero(value);
 
-                                }
+                            }
 
                         }
 
@@ -2703,9 +2016,7 @@ function crearGraficoBarras(
                     scales:{
 
                         y:{
-
                             beginAtZero:true
-
                         }
 
                     }
@@ -2719,23 +2030,23 @@ function crearGraficoBarras(
 
 
 /* =========================================================
-EJECUTIVO
+   EJECUTIVO
 ========================================================= */
 
 function renderEjecutivo(rows){
 
-    const m=
+    const m =
         calcularMetricas(rows);
 
 
-    const grupos=
+    const grupos =
         agrupar(
             rows,
             COL.TRAMO
         );
 
 
-    const tramos=[
+    const tramos = [
         "PREVENTIVO",
         "TRAMO 1",
         "TRAMO 2",
@@ -2743,7 +2054,7 @@ function renderEjecutivo(rows){
     ];
 
 
-    const labels=
+    const labels =
         tramos.filter(
             x=>grupos.has(x)
         );
@@ -2751,7 +2062,7 @@ function renderEjecutivo(rows){
 
     document.getElementById(
         "ejecutivo"
-    ).innerHTML=
+    ).innerHTML =
 
         construirKPIs(m)
 
@@ -2785,7 +2096,7 @@ function renderEjecutivo(rows){
                 </h2>
 
                 <p class="card-sub">
-                    Comparación entre recuperación real y meta.
+                    Recuperación real por tramo.
                 </p>
 
                 <div class="chart-box">
@@ -2818,10 +2129,8 @@ function renderEjecutivo(rows){
                             ).cartera
                     ),
 
-                backgroundColor:
-                    "#8FC9ED"
+                backgroundColor:"#8FC9ED"
             },
-
 
             {
                 label:"Recuperado USD",
@@ -2834,8 +2143,7 @@ function renderEjecutivo(rows){
                             ).recuperado
                     ),
 
-                backgroundColor:
-                    "#F7A8BB"
+                backgroundColor:"#F7A8BB"
             }
 
         ],
@@ -2845,25 +2153,21 @@ function renderEjecutivo(rows){
     );
 
 
-    const metas=
-        labels.map(
-            x=>{
+    const metas =
+        labels.map(x=>{
 
-                if(
-                    x==="PREVENTIVO" ||
-                    x==="TRAMO 1"
-                )
-                    return 96;
+            if(
+                x === "PREVENTIVO" ||
+                x === "TRAMO 1"
+            )
+                return 96;
 
-                if(
-                    x==="TRAMO 2"
-                )
-                    return 60;
+            if(x === "TRAMO 2")
+                return 60;
 
-                return 35;
+            return 35;
 
-            }
-        );
+        });
 
 
     crearGraficoBarras(
@@ -2885,18 +2189,15 @@ function renderEjecutivo(rows){
                             ).porcentajeRecuperacion
                     ),
 
-                backgroundColor:
-                    "#8FC9ED"
+                backgroundColor:"#8FC9ED"
             },
-
 
             {
                 label:"Meta",
 
                 data:metas,
 
-                backgroundColor:
-                    "#F7A8BB"
+                backgroundColor:"#F7A8BB"
             }
 
         ],
@@ -2909,15 +2210,12 @@ function renderEjecutivo(rows){
 
 
 /* =========================================================
-TRAMOS -10 A 90
+   TRAMOS
 ========================================================= */
 
-function calcularTramo(
-    rows,
-    origen
-){
+function calcularTramo(rows,origen){
 
-    const data=
+    const data =
         rows.filter(
             row =>
                 origen.includes(
@@ -2931,16 +2229,14 @@ function calcularTramo(
         );
 
 
-    return calcularMetricas(
-        data
-    );
+    return calcularMetricas(data);
 
 }
 
 
 function renderTramos(rows){
 
-    const config=[
+    const config = [
 
         {
             nombre:"TRAMO -10 AL 30",
@@ -2976,18 +2272,16 @@ function renderTramos(rows){
     ];
 
 
-    let totalC=0;
+    let totalC = 0;
 
-    let totalR=0;
+    let totalR = 0;
 
-    let totalO=0;
+    let totalO = 0;
 
-    let totalU=0;
+    let totalU = 0;
 
 
-    let html=
-
-    `
+    let html = `
 
     <div class="card">
 
@@ -2996,9 +2290,9 @@ function renderTramos(rows){
         </h2>
 
         <p class="card-sub">
-            PREVENTIVO + TRAMO 1 = TRAMO -10 AL 30.
-            TRAMO 2 = TRAMO 31 AL 60.
-            TRAMO 3 = TRAMO 61 AL 90.
+            PREVENTIVO + TRAMO 1 = -10 a 30.
+            TRAMO 2 = 31 a 60.
+            TRAMO 3 = 61 a 90.
         </p>
 
         <div class="table-wrap">
@@ -3010,31 +2304,18 @@ function renderTramos(rows){
         <tr>
 
             <th>Tramo ejecutivo</th>
-
             <th>Q_OPERATION</th>
-
             <th>Q_UNICO</th>
-
             <th>Cartera</th>
-
             <th>Recuperado</th>
-
             <th>% Real</th>
-
             <th>Meta</th>
-
             <th>Brecha</th>
-
             <th>Recuperación objetivo</th>
-
             <th>Diferencia recupero objetivo</th>
-
             <th>Saldo</th>
-
             <th>Q_Promesas</th>
-
             <th>Monto Promesas</th>
-
             <th>% Efect. PDP</th>
 
         </tr>
@@ -3042,13 +2323,12 @@ function renderTramos(rows){
         </thead>
 
         <tbody>
-
     `;
 
 
     config.forEach(c=>{
 
-        const m=
+        const m =
             calcularTramo(
                 rows,
                 c.origen
@@ -3064,78 +2344,52 @@ function renderTramos(rows){
         totalU += m.qUnico;
 
 
-        const objetivo=
-            m.cartera*
-            c.meta/
+        const objetivo =
+            m.cartera *
+            c.meta /
             100;
 
 
-        /*
-        Diferencia:
-
-        Recuperado - Recuperación objetivo
-
-        Si es negativa:
-        falta recuperar.
-
-        Si es positiva:
-        supera objetivo.
-        */
-
-        const diferencia=
-            m.recuperado-
+        const diferencia =
+            m.recuperado -
             objetivo;
 
 
-        const brecha=
-            m.porcentajeRecuperacion-
+        const brecha =
+            m.porcentajeRecuperacion -
             c.meta;
 
 
-        html+=`
+        html += `
 
         <tr>
 
             <td>
-                <b>
-                    ${c.nombre}
-                </b>
+                <b>${c.nombre}</b>
             </td>
 
-            <td>
-                ${entero(m.qOperation)}
-            </td>
+            <td>${entero(m.qOperation)}</td>
 
-            <td>
-                ${entero(m.qUnico)}
-            </td>
+            <td>${entero(m.qUnico)}</td>
 
-            <td>
-                ${dinero(m.cartera)}
-            </td>
+            <td>${dinero(m.cartera)}</td>
 
-            <td>
-                ${dinero(m.recuperado)}
-            </td>
+            <td>${dinero(m.recuperado)}</td>
 
-            <td>
-                ${porcentaje(
-                    m.porcentajeRecuperacion
-                )}
-            </td>
+            <td>${porcentaje(
+                m.porcentajeRecuperacion
+            )}</td>
 
-            <td>
-                ${porcentaje(c.meta)}
-            </td>
+            <td>${porcentaje(c.meta)}</td>
 
             <td class="${
-                brecha>=0
+                brecha >= 0
                 ?"positive"
                 :"negative"
             }">
 
                 ${
-                    brecha>=0
+                    brecha >= 0
                     ?"+"
                     :""
                 }${porcentaje(brecha)}
@@ -3147,13 +2401,13 @@ function renderTramos(rows){
             </td>
 
             <td class="${
-                diferencia>=0
+                diferencia >= 0
                 ?"positive"
                 :"negative"
             }">
 
                 ${
-                    diferencia>=0
+                    diferencia >= 0
                     ?"+"
                     :""
                 }${dinero(diferencia)}
@@ -3183,35 +2437,33 @@ function renderTramos(rows){
     });
 
 
-    const totalMeta=65;
+    const totalMeta = 65;
 
-
-    const totalObjetivo=
-        totalC*
-        totalMeta/
+    const totalObjetivo =
+        totalC *
+        totalMeta /
         100;
 
 
-    const totalBrecha=
-        totalC>0
+    const totalBrecha =
+        totalC > 0
         ?
-        totalR/totalC*100-totalMeta
+        totalR / totalC * 100 -
+        totalMeta
         :
         0;
 
 
-    const totalDiferencia=
-        totalR-
+    const totalDiferencia =
+        totalR -
         totalObjetivo;
 
 
-    const mt=
-        calcularMetricas(
-            rows
-        );
+    const mt =
+        calcularMetricas(rows);
 
 
-    html+=`
+    html += `
 
         <tr class="total-row">
 
@@ -3237,10 +2489,10 @@ function renderTramos(rows){
 
             <td>
                 ${porcentaje(
-                    totalC>0
+                    totalC > 0
                     ?
-                    totalR/
-                    totalC*
+                    totalR /
+                    totalC *
                     100
                     :
                     0
@@ -3252,13 +2504,13 @@ function renderTramos(rows){
             </td>
 
             <td class="${
-                totalBrecha>=0
+                totalBrecha >= 0
                 ?"positive"
                 :"negative"
             }">
 
                 ${
-                    totalBrecha>=0
+                    totalBrecha >= 0
                     ?"+"
                     :""
                 }${porcentaje(totalBrecha)}
@@ -3270,13 +2522,13 @@ function renderTramos(rows){
             </td>
 
             <td class="${
-                totalDiferencia>=0
+                totalDiferencia >= 0
                 ?"positive"
                 :"negative"
             }">
 
                 ${
-                    totalDiferencia>=0
+                    totalDiferencia >= 0
                     ?"+"
                     :""
                 }${dinero(totalDiferencia)}
@@ -3309,638 +2561,54 @@ function renderTramos(rows){
 
     </div>
 
-
-    <div class="grid2">
-
-        <div class="card">
-
-            <h2 class="card-title">
-                % recuperación vs meta
-            </h2>
-
-            <p class="card-sub">
-                Metas individuales: 96%, 60%, 35%.
-            </p>
-
-            <div class="chart-box">
-                <canvas id="chartTramosMeta"></canvas>
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <h2 class="card-title">
-                Cartera vs recuperado -10 a 90
-            </h2>
-
-            <p class="card-sub">
-                Comparación monetaria por tramo ejecutivo.
-            </p>
-
-            <div class="chart-box">
-                <canvas id="chartTramosMonto"></canvas>
-            </div>
-
-        </div>
-
-    </div>
-
     `;
 
 
     document.getElementById(
         "tramos"
-    ).innerHTML=html;
-
-
-    crearGraficoBarras(
-
-        "chartTramosMeta",
-
-        config.map(
-            x=>x.nombre
-        ),
-
-        [
-
-            {
-                label:"% Real",
-
-                data:
-                    config.map(
-                        c=>
-                            calcularTramo(
-                                rows,
-                                c.origen
-                            ).porcentajeRecuperacion
-                    ),
-
-                backgroundColor:
-                    "#8FC9ED"
-            },
-
-            {
-                label:"Meta",
-
-                data:
-                    config.map(
-                        c=>c.meta
-                    ),
-
-                backgroundColor:
-                    "#F7A8BB"
-            }
-
-        ],
-
-        "pct"
-
-    );
-
-
-    crearGraficoBarras(
-
-        "chartTramosMonto",
-
-        config.map(
-            x=>x.nombre
-        ),
-
-        [
-
-            {
-                label:"Cartera USD",
-
-                data:
-                    config.map(
-                        c=>
-                            calcularTramo(
-                                rows,
-                                c.origen
-                            ).cartera
-                    ),
-
-                backgroundColor:
-                    "#8FC9ED"
-            },
-
-            {
-                label:"Recuperado USD",
-
-                data:
-                    config.map(
-                        c=>
-                            calcularTramo(
-                                rows,
-                                c.origen
-                            ).recuperado
-                    ),
-
-                backgroundColor:
-                    "#F7A8BB"
-            }
-
-        ],
-
-        "money"
-
-    );
+    ).innerHTML = html;
 
 }
 
 
 /* =========================================================
-TIPO CUOTA - FILTRO LOCAL
-========================================================= */
-
-function obtenerFiltradosTipoCuota(rows){
-
-    return rows.filter(row=>{
-
-        const pago=
-            numero(
-                valor(
-                    row,
-                    COL.RECUPERADO
-                )
-            );
-
-
-        if(
-            APP.tipoPagoFiltro ===
-            "CON PAGO"
-            &&
-            pago <= 0
-        )
-            return false;
-
-
-        if(
-            APP.tipoPagoFiltro ===
-            "SIN PAGO"
-            &&
-            pago > 0
-        )
-            return false;
-
-
-        if(APP.tipoFechaDesde){
-
-            const f=
-                fechaISO(
-                    valor(
-                        row,
-                        COL.FECHA_PAGO
-                    )
-                );
-
-
-            if(
-                !f ||
-                f <
-                APP.tipoFechaDesde
-            )
-                return false;
-
-        }
-
-
-        if(APP.tipoFechaHasta){
-
-            const f=
-                fechaISO(
-                    valor(
-                        row,
-                        COL.FECHA_PAGO
-                    )
-                );
-
-
-            if(
-                !f ||
-                f >
-                APP.tipoFechaHasta
-            )
-                return false;
-
-        }
-
-
-        return true;
-
-    });
-
-}
-
-
-/* =========================================================
-CONTROLES TIPO CUOTA
-========================================================= */
-
-function controlesTipoCuota(){
-
-    return `
-
-    <div class="tipo-controls">
-
-
-        <div class="tipo-block">
-
-            <div class="tipo-title">
-                FILTRO: FECHAS DESDE - HASTA
-            </div>
-
-
-            <div class="date-row">
-
-                <label>
-                    DESDE
-                </label>
-
-                <input
-                    id="tipoFechaDesde"
-                    type="date"
-                    value="${APP.tipoFechaDesde}">
-
-
-                <label>
-                    HASTA
-                </label>
-
-                <input
-                    id="tipoFechaHasta"
-                    type="date"
-                    value="${APP.tipoFechaHasta}">
-
-            </div>
-
-        </div>
-
-
-        <div class="tipo-block">
-
-            <div class="tipo-title">
-                FILTRO: CON PAGO - SIN PAGO
-            </div>
-
-
-            <div class="payment-buttons">
-
-                <button
-                    data-tipo-pago="TODOS"
-                    class="${
-                        APP.tipoPagoFiltro
-                        ==="TODOS"
-                        ?"active"
-                        :""
-                    }">
-
-                    TODOS
-
-                </button>
-
-
-                <button
-                    data-tipo-pago="CON PAGO"
-                    class="${
-                        APP.tipoPagoFiltro
-                        ==="CON PAGO"
-                        ?"active"
-                        :""
-                    }">
-
-                    CON PAGO
-
-                </button>
-
-
-                <button
-                    data-tipo-pago="SIN PAGO"
-                    class="${
-                        APP.tipoPagoFiltro
-                        ==="SIN PAGO"
-                        ?"active"
-                        :""
-                    }">
-
-                    SIN PAGO
-
-                </button>
-
-            </div>
-
-        </div>
-
-
-    </div>
-
-    `;
-
-}
-
-
-/* =========================================================
-TABLA TIPO CUOTA
-========================================================= */
-
-function tablaTipoCuota(rows){
-
-    const grupos=
-        agrupar(
-            rows,
-            COL.TIPO
-        );
-
-
-    const tipos=
-        [...grupos.keys()]
-        .filter(Boolean)
-        .sort(
-            (a,b)=>{
-
-                const orden=[
-                    "NORMAL",
-                    "TAXI",
-                    "BIGTICKET",
-                    "BALON",
-                    "1RA4TA5TA",
-                    "TOP"
-                ];
-
-                const ia=
-                    orden.indexOf(
-                        normalizar(a)
-                    );
-
-                const ib=
-                    orden.indexOf(
-                        normalizar(b)
-                    );
-
-
-                if(ia>=0 && ib>=0)
-                    return ia-ib;
-
-                if(ia>=0)
-                    return -1;
-
-                if(ib>=0)
-                    return 1;
-
-                return a.localeCompare(
-                    b,
-                    "es"
-                );
-
-            }
-        );
-
-
-    let html=`
-
-    <div class="table-wrap">
-
-    <table>
-
-    <thead>
-
-    <tr>
-
-        <th>TIPO_CUOTA</th>
-
-        <th>Cartera</th>
-
-        <th>Recuperado</th>
-
-        <th>% Rec.</th>
-
-        <th>Saldo</th>
-
-        <th>Q_OPERATION</th>
-
-        <th>Q_UNICO</th>
-
-        <th>Con pago</th>
-
-        <th>Sin pago</th>
-
-        <th>Cobertura cartera</th>
-
-        <th>Intensidad General</th>
-
-        <th>Intensidad Marcador</th>
-
-        <th>Intensidad Marcador varios</th>
-
-    </tr>
-
-    </thead>
-
-    <tbody>
-
-    `;
-
-
-    tipos.forEach(tipo=>{
-
-        const grupo=
-            grupos.get(tipo);
-
-
-        const m=
-            calcularMetricas(
-                grupo
-            );
-
-
-        const p=
-            calcularProductividad(
-                grupo
-            );
-
-
-        html+=`
-
-        <tr>
-
-            <td>
-                <b>
-                    ${escapeHTML(tipo)}
-                </b>
-            </td>
-
-            <td>
-                ${dinero(m.cartera)}
-            </td>
-
-            <td>
-                ${dinero(m.recuperado)}
-            </td>
-
-            <td>
-                ${porcentaje(
-                    m.porcentajeRecuperacion
-                )}
-            </td>
-
-            <td>
-                ${dinero(m.saldo)}
-            </td>
-
-            <td>
-                ${entero(m.qOperation)}
-            </td>
-
-            <td>
-                ${entero(m.qUnico)}
-            </td>
-
-            <td>
-                ${entero(m.qConPago)}
-            </td>
-
-            <td>
-                ${entero(m.qSinPago)}
-            </td>
-
-            <td>
-                ${entero(p.cobertura)}
-            </td>
-
-            <td>
-                ${p.intensidadGeneral.toFixed(2)}
-            </td>
-
-            <td>
-                ${p.intensidadMarcador.toFixed(2)}
-            </td>
-
-            <td>
-                ${p.intensidadVarios.toFixed(2)}
-            </td>
-
-        </tr>
-
-        `;
-
-    });
-
-
-    if(!tipos.length){
-
-        html+=`
-
-        <tr>
-
-            <td
-                colspan="13">
-
-                No existen registros para
-                los filtros seleccionados.
-
-            </td>
-
-        </tr>
-
-        `;
-
-    }
-
-
-    html+=`
-
-    </tbody>
-
-    </table>
-
-    </div>
-
-    `;
-
-
-    return html;
-
-}
-
-
-/* =========================================================
-RECUPERO
+   RECUPERO
 ========================================================= */
 
 function renderRecupero(rows){
 
-    const m=
+    const m =
         calcularMetricas(rows);
 
 
-    const grupos=
+    const grupos =
         agrupar(
             rows,
             COL.TIPO
         );
 
 
-    const tipos=
+    const tipos =
         [...grupos.keys()]
-        .filter(Boolean);
-
-
-    const freq=
-        agrupar(
-            rows,
-            "CANT_VECES_PAGO_HIS"
+        .filter(Boolean)
+        .sort(
+            (a,b)=>
+                a.localeCompare(
+                    b,
+                    "es"
+                )
         );
 
 
     document.getElementById(
         "recupero"
-    ).innerHTML=
+    ).innerHTML =
 
         construirKPIs(m)
 
         +
 
         `
-
-        <div class="grid2">
-
-            <div class="card">
-
-                <h2 class="card-title">
-                    Recuperación por TIPO_CUOTA
-                </h2>
-
-                <p class="card-sub">
-                    Cartera y recuperado por tipo de cuota.
-                </p>
-
-                <div class="chart-box">
-                    <canvas id="chartTipo"></canvas>
-                </div>
-
-            </div>
-
-
-            <div class="card">
-
-                <h2 class="card-title">
-                    Frecuencia histórica de pago
-                </h2>
-
-                <p class="card-sub">
-                    Operaciones por CANT_VECES_PAGO_HIS.
-                </p>
-
-                <div class="chart-box">
-                    <canvas id="chartFreq"></canvas>
-                </div>
-
-            </div>
-
-        </div>
-
 
         <div class="card">
 
@@ -3949,205 +2617,148 @@ function renderRecupero(rows){
             </h2>
 
             <p class="card-sub">
-                Detalle monetario y operativo por tipo de cuota.
-                Los filtros de fecha y pago son independientes
-                de los filtros globales.
+                Cartera, recuperado y porcentaje
+                por tipo de cuota.
             </p>
 
-            ${controlesTipoCuota()}
+            <div class="table-wrap">
 
-            ${tablaTipoCuota(
-                obtenerFiltradosTipoCuota(
-                    rows
-                )
-            )}
+                <table>
+
+                    <thead>
+
+                        <tr>
+                            <th>TIPO_CUOTA</th>
+                            <th>Cartera</th>
+                            <th>Recuperado</th>
+                            <th>% Rec.</th>
+                            <th>Saldo</th>
+                            <th>Q_OPERATION</th>
+                            <th>Q_UNICO</th>
+                            <th>Con pago</th>
+                            <th>Sin pago</th>
+                            <th>Cobertura</th>
+                            <th>Intensidad General</th>
+                            <th>Intensidad Marcador</th>
+                            <th>Intensidad Marcador varios</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        ${
+                            tipos.map(tipo=>{
+
+                                const grupo =
+                                    grupos.get(tipo);
+
+                                const m =
+                                    calcularMetricas(
+                                        grupo
+                                    );
+
+                                const p =
+                                    calcularProductividad(
+                                        grupo
+                                    );
+
+                                return `
+
+                                <tr>
+
+                                    <td>
+                                        <b>
+                                            ${escapeHTML(tipo)}
+                                        </b>
+                                    </td>
+
+                                    <td>
+                                        ${dinero(m.cartera)}
+                                    </td>
+
+                                    <td>
+                                        ${dinero(m.recuperado)}
+                                    </td>
+
+                                    <td>
+                                        ${porcentaje(
+                                            m.porcentajeRecuperacion
+                                        )}
+                                    </td>
+
+                                    <td>
+                                        ${dinero(m.saldo)}
+                                    </td>
+
+                                    <td>
+                                        ${entero(m.qOperation)}
+                                    </td>
+
+                                    <td>
+                                        ${entero(m.qUnico)}
+                                    </td>
+
+                                    <td>
+                                        ${entero(m.qConPago)}
+                                    </td>
+
+                                    <td>
+                                        ${entero(m.qSinPago)}
+                                    </td>
+
+                                    <td>
+                                        ${entero(p.cobertura)}
+                                    </td>
+
+                                    <td>
+                                        ${p.intensidadGeneral.toFixed(2)}
+                                    </td>
+
+                                    <td>
+                                        ${p.intensidadMarcador.toFixed(2)}
+                                    </td>
+
+                                    <td>
+                                        ${p.intensidadVarios.toFixed(2)}
+                                    </td>
+
+                                </tr>
+
+                                `;
+
+                            }).join("")
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
 
         </div>
 
         `;
 
-
-    crearGraficoBarras(
-
-        "chartTipo",
-
-        tipos,
-
-        [
-
-            {
-                label:"Cartera USD",
-
-                data:
-                    tipos.map(
-                        t=>
-                            calcularMetricas(
-                                grupos.get(t)
-                            ).cartera
-                    ),
-
-                backgroundColor:
-                    "#8FC9ED"
-            },
-
-            {
-                label:"Recuperado USD",
-
-                data:
-                    tipos.map(
-                        t=>
-                            calcularMetricas(
-                                grupos.get(t)
-                            ).recuperado
-                    ),
-
-                backgroundColor:
-                    "#F7A8BB"
-            }
-
-        ],
-
-        "money"
-
-    );
-
-
-    const frecuencia=
-        [...freq.entries()]
-        .filter(
-            ([k])=>
-                k!==""
-        )
-        .sort(
-            (a,b)=>
-                numero(a[0])-
-                numero(b[0])
-        );
-
-
-    crearGraficoBarras(
-
-        "chartFreq",
-
-        frecuencia.map(
-            x=>x[0]
-        ),
-
-        [
-
-            {
-                label:"Operaciones",
-
-                data:
-                    frecuencia.map(
-                        x=>x[1].length
-                    ),
-
-                backgroundColor:
-                    "#8FC9ED"
-            }
-
-        ],
-
-        "number"
-
-    );
-
-
-    activarFiltrosTipoCuota();
-
 }
 
 
 /* =========================================================
-ACTIVAR FILTROS LOCALES
-========================================================= */
-
-function activarFiltrosTipoCuota(){
-
-    const desde=
-        document.getElementById(
-            "tipoFechaDesde"
-        );
-
-
-    const hasta=
-        document.getElementById(
-            "tipoFechaHasta"
-        );
-
-
-    if(desde){
-
-        desde.onchange=
-            ()=>{
-
-                APP.tipoFechaDesde=
-                    desde.value;
-
-                render();
-
-            };
-
-    }
-
-
-    if(hasta){
-
-        hasta.onchange=
-            ()=>{
-
-                APP.tipoFechaHasta=
-                    hasta.value;
-
-                render();
-
-            };
-
-    }
-
-
-    document
-    .querySelectorAll(
-        "[data-tipo-pago]"
-    )
-    .forEach(button=>{
-
-        button.onclick=
-            ()=>{
-
-                APP.tipoPagoFiltro=
-                    button.dataset
-                    .tipoPago;
-
-                render();
-
-            };
-
-    });
-
-}
-
-
-/* =========================================================
-GESTIÓN
+   GESTIÓN
 ========================================================= */
 
 function renderGestion(rows){
 
-    const m=
+    const m =
         calcularMetricas(rows);
 
-
-    const p=
+    const p =
         calcularProductividad(rows);
 
 
     document.getElementById(
         "gestion"
-    ).innerHTML=
-
-    `
+    ).innerHTML = `
 
     <div class="card">
 
@@ -4156,12 +2767,10 @@ function renderGestion(rows){
         </h2>
 
         <p class="card-sub">
-            Indicadores de cobertura y contacto.
+            Indicadores de cobertura e intensidad.
         </p>
 
-
         <div class="grid3">
-
 
             <div class="kpi">
 
@@ -4174,7 +2783,24 @@ function renderGestion(rows){
                 </div>
 
                 <div class="kpi-desc">
-                    CANT_GEST_CALL
+                    SUM(CANT_GEST_CALL)
+                </div>
+
+            </div>
+
+
+            <div class="kpi purple">
+
+                <div class="kpi-title">
+                    Q_OPERATION
+                </div>
+
+                <div class="kpi-value">
+                    ${entero(p.operaciones)}
+                </div>
+
+                <div class="kpi-desc">
+                    OPERACIONES ÚNICAS
                 </div>
 
             </div>
@@ -4196,26 +2822,6 @@ function renderGestion(rows){
 
             </div>
 
-
-            <div class="kpi green">
-
-                <div class="kpi-title">
-                    % CONTACTO DIRECTO
-                </div>
-
-                <div class="kpi-value">
-                    ${porcentaje(
-                        m.porcentajeContactoDirecto
-                    )}
-                </div>
-
-                <div class="kpi-desc">
-                    CONTACTO / Q_OPERATION
-                </div>
-
-            </div>
-
-
         </div>
 
 
@@ -4228,7 +2834,9 @@ function renderGestion(rows){
                     <tr>
 
                         <th>Indicador</th>
+
                         <th>Resultado</th>
+
                         <th>Fórmula</th>
 
                     </tr>
@@ -4240,17 +2848,15 @@ function renderGestion(rows){
                     <tr>
 
                         <td>
-                            Cobertura cartera
+                            Q_OPERATION
                         </td>
 
                         <td>
-                            ${entero(
-                                p.cobertura
-                            )}
+                            ${entero(p.operaciones)}
                         </td>
 
                         <td>
-                            CANT_GEST_CALL
+                            COUNT DISTINCT(OPERACION)
                         </td>
 
                     </tr>
@@ -4259,16 +2865,15 @@ function renderGestion(rows){
                     <tr>
 
                         <td>
-                            Intensidad General
+                            Cobertura
                         </td>
 
                         <td>
-                            ${p.intensidadGeneral.toFixed(2)}
+                            ${entero(p.cobertura)}
                         </td>
 
                         <td>
-                            (CALL + PROMESA + CONTACTO +
-                            IVR + EMAIL + SMS) / Q_OPERATION
+                            SUM(CANT_GEST_CALL)
                         </td>
 
                     </tr>
@@ -4285,7 +2890,7 @@ function renderGestion(rows){
                         </td>
 
                         <td>
-                            CANT_GEST_CALL / Q_OPERATION
+                            SUM(CANT_GEST_CALL) / Q_OPERATION
                         </td>
 
                     </tr>
@@ -4302,9 +2907,45 @@ function renderGestion(rows){
                         </td>
 
                         <td>
-                            (PROMESA + CONTACTO +
-                            IVR + EMAIL + SMS) /
-                            Q_OPERATION
+                            (PROMESA + CONTACTO + IVR + EMAIL + SMS)
+                            / Q_OPERATION
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            Intensidad General
+                        </td>
+
+                        <td>
+                            ${p.intensidadGeneral.toFixed(2)}
+                        </td>
+
+                        <td>
+                            (CALL + PROMESA + CONTACTO + IVR + EMAIL + SMS)
+                            / Q_OPERATION
+                        </td>
+
+                    </tr>
+
+
+                    <tr>
+
+                        <td>
+                            % Contacto Directo
+                        </td>
+
+                        <td>
+                            ${porcentaje(
+                                m.porcentajeContactoDirecto
+                            )}
+                        </td>
+
+                        <td>
+                            CONTACTO / Q_OPERATION
                         </td>
 
                     </tr>
@@ -4323,21 +2964,19 @@ function renderGestion(rows){
 
 
 /* =========================================================
-CARTERA / RIESGO
+   CARTERA
 ========================================================= */
 
 function renderCartera(rows){
 
-    const grupos=
+    const grupos =
         agrupar(
             rows,
             COL.SBS
         );
 
 
-    let html=
-
-    `
+    let html = `
 
     <div class="card">
 
@@ -4359,21 +2998,13 @@ function renderCartera(rows){
         <tr>
 
             <th>CALIFICACION_SBS</th>
-
             <th>Cartera</th>
-
             <th>Recuperado</th>
-
             <th>% Rec.</th>
-
             <th>Saldo</th>
-
             <th>Q_OPERATION</th>
-
             <th>Q_UNICO</th>
-
             <th>Con pago</th>
-
             <th>Sin pago</th>
 
         </tr>
@@ -4386,25 +3017,21 @@ function renderCartera(rows){
 
 
     [...grupos.entries()]
+    .map(
+        ([sbs,data])=>[
+            sbs,
+            calcularMetricas(data)
+        ]
+    )
     .sort(
         (a,b)=>
-            calcularMetricas(
-                b[1]
-            ).cartera-
-            calcularMetricas(
-                a[1]
-            ).cartera
+            b[1].cartera -
+            a[1].cartera
     )
     .forEach(
-        ([sbs,data])=>{
+        ([sbs,m])=>{
 
-            const m=
-                calcularMetricas(
-                    data
-                );
-
-
-            html+=`
+            html += `
 
             <tr>
 
@@ -4456,7 +3083,7 @@ function renderCartera(rows){
     );
 
 
-    html+=`
+    html += `
 
         </tbody>
 
@@ -4471,27 +3098,25 @@ function renderCartera(rows){
 
     document.getElementById(
         "cartera"
-    ).innerHTML=html;
+    ).innerHTML = html;
 
 }
 
 
 /* =========================================================
-ASESORES
+   ASESORES
 ========================================================= */
 
 function renderAsesores(rows){
 
-    const grupos=
+    const grupos =
         agrupar(
             rows,
             COL.ASESOR
         );
 
 
-    let html=
-
-    `
+    let html = `
 
     <div class="card">
 
@@ -4512,25 +3137,15 @@ function renderAsesores(rows){
         <tr>
 
             <th>Asesor</th>
-
             <th>Cartera</th>
-
             <th>Recuperado</th>
-
             <th>% Rec.</th>
-
             <th>Q_OPERATION</th>
-
             <th>Q_UNICO</th>
-
             <th>Con pago</th>
-
             <th>Sin pago</th>
-
             <th>Q Promesas</th>
-
             <th>Monto Promesas</th>
-
             <th>% Efect. PDP</th>
 
         </tr>
@@ -4551,13 +3166,13 @@ function renderAsesores(rows){
     )
     .sort(
         (a,b)=>
-            b[1].recuperado-
+            b[1].recuperado -
             a[1].recuperado
     )
     .forEach(
         ([asesor,m])=>{
 
-            html+=`
+            html += `
 
             <tr>
 
@@ -4617,7 +3232,7 @@ function renderAsesores(rows){
     );
 
 
-    html+=`
+    html += `
 
         </tbody>
 
@@ -4632,13 +3247,13 @@ function renderAsesores(rows){
 
     document.getElementById(
         "asesores"
-    ).innerHTML=html;
+    ).innerHTML = html;
 
 }
 
 
 /* =========================================================
-RENDER PRINCIPAL
+   RENDER
 ========================================================= */
 
 function render(){
@@ -4647,105 +3262,96 @@ function render(){
         return;
 
 
-    const rows=
+    const rows =
         obtenerFiltrados();
 
 
     document
-    .querySelectorAll(
-        ".view"
-    )
-    .forEach(
-        view =>
-            view.classList.remove(
-                "active"
-            )
-    );
+        .querySelectorAll(".view")
+        .forEach(
+            view =>
+                view.classList.remove("active")
+        );
 
 
-    const actual=
+    const actual =
         document.getElementById(
             APP.view
         );
 
 
     if(actual)
-        actual.classList.add(
-            "active"
-        );
+        actual.classList.add("active");
 
 
-    if(APP.view==="ejecutivo")
-        renderEjecutivo(rows);
+    switch(APP.view){
 
+        case "ejecutivo":
+            renderEjecutivo(rows);
+            break;
 
-    if(APP.view==="recupero")
-        renderRecupero(rows);
+        case "recupero":
+            renderRecupero(rows);
+            break;
 
+        case "gestion":
+            renderGestion(rows);
+            break;
 
-    if(APP.view==="gestion")
-        renderGestion(rows);
+        case "cartera":
+            renderCartera(rows);
+            break;
 
+        case "asesores":
+            renderAsesores(rows);
+            break;
 
-    if(APP.view==="cartera")
-        renderCartera(rows);
+        case "tramos":
+            renderTramos(rows);
+            break;
 
-
-    if(APP.view==="asesores")
-        renderAsesores(rows);
-
-
-    if(APP.view==="tramos")
-        renderTramos(rows);
+    }
 
 }
 
 
 /* =========================================================
-CAMBIAR VISTA
+   NAVEGACIÓN
 ========================================================= */
 
 document
-.querySelectorAll(
-    ".nav-btn"
-)
-.forEach(button=>{
+    .querySelectorAll(".nav-btn")
+    .forEach(button=>{
 
-    button.addEventListener(
-        "click",
-        ()=>{
+        button.addEventListener(
+            "click",
+            ()=>{
 
-            document
-            .querySelectorAll(
-                ".nav-btn"
-            )
-            .forEach(
-                b=>
-                    b.classList.remove(
-                        "active"
-                    )
-            );
+                document
+                    .querySelectorAll(".nav-btn")
+                    .forEach(
+                        b =>
+                            b.classList.remove("active")
+                    );
 
 
-            button.classList.add(
-                "active"
-            );
+                button.classList.add("active");
 
 
-            APP.view=
-                button.dataset.view;
+                APP.view =
+                    button.dataset.view;
 
 
-            render();
+                render();
 
-        }
-    );
+            }
+        );
 
-});
+    });
 
 
 /* =========================================================
-EVENTOS FILTROS
+   FILTROS
 ========================================================= */
 
 [
@@ -4759,67 +3365,63 @@ EVENTOS FILTROS
 .forEach(id=>{
 
     document
-    .getElementById(id)
-    .addEventListener(
-        "change",
-        render
-    );
+        .getElementById(id)
+        .addEventListener(
+            "change",
+            render
+        );
 
 });
 
 
 /* =========================================================
-LIMPIAR
+   LIMPIAR
 ========================================================= */
 
 document
-.getElementById(
-    "clearBtn"
-)
-.addEventListener(
-    "click",
-    ()=>{
+    .getElementById("clearBtn")
+    .addEventListener(
+        "click",
+        ()=>{
 
-        [
-            "fMes",
-            "fCiclo",
-            "fTramo",
-            "fSbs",
-            "fPago",
-            "fTipo"
-        ]
-        .forEach(id=>{
+            [
+                "fMes",
+                "fCiclo",
+                "fTramo",
+                "fSbs",
+                "fPago",
+                "fTipo"
+            ]
+            .forEach(id=>{
 
-            document
-            .getElementById(id)
-            .value=
-                "__ALL__";
+                document
+                    .getElementById(id)
+                    .value = "__ALL__";
 
-        });
+            });
 
 
-        APP.selectedAsesores.clear();
+            APP.selectedAsesores.clear();
 
-        APP.selectedEstados.clear();
+            APP.selectedEstados.clear();
 
-        APP.tipoFechaDesde="";
+            APP.tipoFechaDesde = "";
 
-        APP.tipoFechaHasta="";
+            APP.tipoFechaHasta = "";
 
-        APP.tipoPagoFiltro=
-            "TODOS";
+            APP.tipoPagoFiltro = "TODOS";
 
 
-        cargarFiltros();
+            cargarFiltros();
 
-        render();
+            render();
 
-    }
-);
+        }
+    );
 
 
 /* =========================================================
-CLICK FUERA MULTI SELECT
+   CERRAR MULTISELECT
 ========================================================= */
 
 document.addEventListener(
@@ -4827,70 +3429,82 @@ document.addEventListener(
     ()=>{
 
         document
-        .querySelectorAll(
-            ".multi.open"
-        )
-        .forEach(
-            el=>
-                el.classList.remove(
-                    "open"
-                )
-        );
+            .querySelectorAll(".multi.open")
+            .forEach(
+                el =>
+                    el.classList.remove("open")
+            );
 
     }
 );
 
 
 /* =========================================================
-CARGA AUTOMÁTICA DEL EXCEL
+   VALIDACIÓN DE COLUMNAS
+========================================================= */
+
+function validarColumnas(){
+
+    const obligatorias = [
+
+        COL.OP,
+        COL.CARTERA,
+        COL.RECUPERADO,
+        COL.TIPO,
+        COL.GEST_CALL,
+        COL.PROMESA_CALL,
+        COL.CONTAC_CALL,
+        COL.GEST_IVR,
+        COL.GEST_EMAIL,
+        COL.GEST_SMS,
+        COL.ESTADO
+
+    ];
+
+
+    const faltantes =
+        obligatorias.filter(
+            col =>
+                COLUMN_MAP[
+                    normalizar(col)
+                ] === undefined
+        );
+
+
+    return faltantes;
+
+}
+
+
+/* =========================================================
+   CARGA EXCEL
 ========================================================= */
 
 async function cargarExcelAutomaticamente(){
 
-    const status=
-        document.getElementById(
-            "status"
-        );
+    const status =
+        document.getElementById("status");
 
 
-    status.classList.remove(
-        "error"
-    );
+    status.classList.remove("error");
 
 
-    status.textContent=
-        "Cargando automáticamente maf_2_v5.xlsx...";
+    status.textContent =
+        `Cargando ${ARCHIVO_EXCEL}...`;
 
 
     try{
 
-        /*
-        IMPORTANTE:
-
-        El Excel está en el mismo
-        directorio que index.html.
-
-        ./maf_2_v5.xlsx
-        */
+        const url =
+            `./${ARCHIVO_EXCEL}?v=${Date.now()}`;
 
 
-        const url=
-            "./maf_2_v5.xlsx?v="+
-            Date.now();
-
-
-        const response=
+        const response =
             await fetch(
                 url,
                 {
                     method:"GET",
-
-                    cache:"no-store",
-
-                    headers:{
-                        "Cache-Control":
-                            "no-cache"
-                    }
+                    cache:"no-store"
                 }
             );
 
@@ -4898,56 +3512,44 @@ async function cargarExcelAutomaticamente(){
         if(!response.ok){
 
             throw new Error(
-                "No se pudo cargar maf_2_v5.xlsx. " +
-                "Código HTTP: "+
-                response.status
+                `No se pudo cargar ${ARCHIVO_EXCEL}. ` +
+                `Código HTTP: ${response.status}`
             );
 
         }
 
 
-        const buffer=
+        const buffer =
             await response.arrayBuffer();
 
 
-        const workbook=
+        const workbook =
             XLSX.read(
                 buffer,
                 {
                     type:"array",
-
                     cellDates:true,
-
                     cellNF:false,
-
                     cellText:false
                 }
             );
 
 
         /*
-        BUSCAR HOJA
+           BUSCAR HOJA MAF EVALUACION
         */
 
-
-        const hoja=
+        const hoja =
             workbook.SheetNames.find(
                 nombre =>
-                    normalizar(
-                        nombre
-                    )
-                    ===
+                    normalizar(nombre) ===
                     "MAF EVALUACION"
             )
             ||
             workbook.SheetNames.find(
                 nombre =>
-                    normalizar(
-                        nombre
-                    )
-                    .includes(
-                        "MAF EVALUACION"
-                    )
+                    normalizar(nombre)
+                    .includes("MAF EVALUACION")
             );
 
 
@@ -4956,21 +3558,14 @@ async function cargarExcelAutomaticamente(){
             throw new Error(
                 "No se encontró la hoja " +
                 "'MAF Evaluacion'. " +
-                "Hojas disponibles: "+
-                workbook.SheetNames.join(
-                    ", "
-                )
+                "Hojas disponibles: " +
+                workbook.SheetNames.join(", ")
             );
 
         }
 
 
-        /*
-        LEER HOJA
-        */
-
-
-        APP.data=
+        APP.data =
             XLSX.utils.sheet_to_json(
                 workbook.Sheets[hoja],
                 {
@@ -4981,75 +3576,42 @@ async function cargarExcelAutomaticamente(){
             );
 
 
-        if(
-            APP.data.length===0
-        ){
+        if(!APP.data.length){
 
             throw new Error(
-                "La hoja MAF Evaluacion " +
-                "no contiene registros."
+                `La hoja "${hoja}" no contiene registros.`
             );
 
         }
 
 
-        APP.headers=
+        APP.headers =
             Object.keys(
                 APP.data[0]
             );
 
 
         /*
-        VALIDAR COLUMNAS
+           CONSTRUIR MAPA DE COLUMNAS
         */
 
-
-        const obligatorias=[
-
-            COL.OP,
-
-            COL.CARTERA,
-
-            COL.RECUPERADO,
-
-            COL.TIPO,
-
-            COL.GEST_CALL,
-
-            COL.PROMESA_CALL,
-
-            COL.CONTAC_CALL,
-
-            COL.GEST_IVR,
-
-            COL.GEST_EMAIL,
-
-            COL.GEST_SMS,
-
-            COL.FLAG_PROMESA,
-
-            COL.FLAG_SEGUIMIENTO,
-
-            COL.ESTADO
-
-        ];
+        construirMapaColumnas(
+            APP.headers
+        );
 
 
-        const faltantes=
-            obligatorias.filter(
-                col =>
-                    !APP.headers.includes(
-                        col
-                    )
-            );
+        /*
+           VALIDAR
+        */
+
+        const faltantes =
+            validarColumnas();
 
 
-        if(
-            faltantes.length
-        ){
+        if(faltantes.length){
 
             throw new Error(
-                "Faltan columnas requeridas: "+
+                "Faltan columnas requeridas: " +
                 faltantes.join(", ")
             );
 
@@ -5057,38 +3619,34 @@ async function cargarExcelAutomaticamente(){
 
 
         /*
-        CARGAR FILTROS
+           FILTROS
         */
-
 
         cargarFiltros();
 
 
         /*
-        ESTADO
+           ESTADO
         */
 
-
-        status.classList.remove(
-            "error"
-        );
+        status.classList.remove("error");
 
 
-        status.innerHTML=
-            "Archivo cargado correctamente. "+
-            `<b>${entero(
-                APP.data.length
-            )}</b> registros. `+
-            "Fuente: maf_2_v5.xlsx";
+        status.innerHTML =
+            "Archivo cargado correctamente. " +
+            `<b>${entero(APP.data.length)}</b> registros. ` +
+            `Hoja: <b>${escapeHTML(hoja)}</b>. ` +
+            `Fuente: ${ARCHIVO_EXCEL}`;
 
 
         /*
-        RENDER
+           RENDER
         */
-
 
         render();
 
+
+        APP.iniciado = true;
 
     }
     catch(error){
@@ -5096,16 +3654,14 @@ async function cargarExcelAutomaticamente(){
         console.error(error);
 
 
-        APP.data=[];
+        APP.data = [];
 
 
-        status.classList.add(
-            "error"
-        );
+        status.classList.add("error");
 
 
-        status.innerHTML=
-            "<b>Error:</b> "+
+        status.innerHTML =
+            "<b>Error:</b> " +
             escapeHTML(
                 error.message
             );
@@ -5113,9 +3669,7 @@ async function cargarExcelAutomaticamente(){
 
         document.getElementById(
             "ejecutivo"
-        ).innerHTML=
-
-            `
+        ).innerHTML = `
 
             <div class="card">
 
@@ -5125,8 +3679,8 @@ async function cargarExcelAutomaticamente(){
 
                 <p class="card-sub">
 
-                    Verifica que estos dos archivos
-                    estén en la misma carpeta:
+                    Verifica que en GitHub estén
+                    exactamente estos archivos:
 
                 </p>
 
@@ -5137,15 +3691,15 @@ maf_2_v5.xlsx
 
                 <p class="card-sub">
 
-                    Si estás utilizando GitHub Pages,
-                    realiza un nuevo commit/push del Excel
-                    y luego utiliza "Actualizar datos".
+                    Además verifica que el nombre del
+                    archivo Excel coincida exactamente,
+                    incluyendo mayúsculas/minúsculas.
 
                 </p>
 
             </div>
 
-            `;
+        `;
 
     }
 
@@ -5153,53 +3707,35 @@ maf_2_v5.xlsx
 
 
 /* =========================================================
-BOTÓN ACTUALIZAR
+   BOTÓN ACTUALIZAR
 ========================================================= */
 
 document
-.getElementById(
-    "refreshBtn"
-)
-.addEventListener(
-    "click",
-    async ()=>{
+    .getElementById("refreshBtn")
+    .addEventListener(
+        "click",
+        async ()=>{
 
-        await cargarExcelAutomaticamente();
+            await cargarExcelAutomaticamente();
 
-    }
-);
+        }
+    );
 
 
 /* =========================================================
-INICIO
+   INICIO
+   UNA SOLA CARGA
 ========================================================= */
 
-document.addEventListener(
-    "DOMContentLoaded",
-    ()=>{
-
-        cargarExcelAutomaticamente();
-
-    }
-);
-
-
-/*
-IMPORTANTE:
-
-DOMContentLoaded puede haberse
-disparado antes de este script.
-
-Por eso hacemos también
-la carga inmediata.
-*/
-
 if(
-    document.readyState ===
-    "loading"
+    document.readyState === "loading"
 ){
 
-    // DOMContentLoaded se encargará
+    document.addEventListener(
+        "DOMContentLoaded",
+        cargarExcelAutomaticamente,
+        {once:true}
+    );
 
 }
 else{
@@ -5210,7 +3746,5 @@ else{
 
 </script>
 
-
 </body>
-
 </html>
