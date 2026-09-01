@@ -1,0 +1,5333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Command Center MAF / Recupero v8.0</title>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+
+<style>
+:root{
+ --navy:#07395f;
+ --blue:#168bd0;
+ --blue2:#0f4c81;
+ --green:#12a66a;
+ --red:#ef4056;
+ --purple:#7650e6;
+ --bg:#edf5fa;
+ --panel:#fff;
+ --text:#17344e;
+ --muted:#687783;
+ --border:#dce5eb;
+ --soft:#f4f7f9;
+}
+
+*{
+ box-sizing:border-box
+}
+
+html,body{
+ margin:0;
+ padding:0;
+ min-height:100%;
+ font-family:Arial,Helvetica,sans-serif
+}
+
+body{
+ background:var(--bg);
+ color:var(--text)
+}
+
+.app{
+ min-height:100vh
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+
+.sidebar{
+ position:fixed;
+ top:0;
+ left:0;
+ bottom:0;
+ width:245px;
+ background:var(--navy);
+ color:#fff;
+ padding:24px 10px;
+ overflow-y:auto;
+ z-index:1000
+}
+
+.logo{
+ padding:5px 14px 22px;
+ font-size:31px;
+ font-weight:900;
+ line-height:1.2
+}
+
+.logo small{
+ display:block;
+ margin-top:10px;
+ font-size:15px;
+ color:#d7e7f2
+}
+
+.nav-btn{
+ width:100%;
+ border:none;
+ background:transparent;
+ color:#fff;
+ padding:15px 14px;
+ margin:4px 0;
+ border-radius:10px;
+ text-align:left;
+ cursor:pointer;
+ font-size:15px;
+ font-weight:800
+}
+
+.nav-btn:hover,
+.nav-btn.active{
+ background:var(--blue)
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main{
+ margin-left:245px;
+ width:calc(100% - 245px);
+ padding:18px
+}
+
+.header{
+ min-height:72px;
+ padding:15px 18px;
+ border-radius:11px;
+ background:#07395f;
+ color:#fff;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+ gap:15px
+}
+
+.header h1{
+ margin:0;
+ font-size:24px
+}
+
+.header small{
+ display:block;
+ margin-top:5px;
+ color:#d7e7f2
+}
+
+.file-area{
+ display:flex;
+ align-items:center;
+ gap:10px
+}
+
+.file-button{
+ display:inline-block;
+ background:#168bd0;
+ color:#fff;
+ padding:12px 18px;
+ border-radius:8px;
+ border:1px solid #70c4ee;
+ cursor:pointer;
+ font-weight:800
+}
+
+#fileInput{
+ display:none
+}
+
+#fileName{
+ max-width:180px;
+ white-space:nowrap;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ font-size:12px
+}
+
+.status{
+ margin:12px 0;
+ padding:12px 15px;
+ border-radius:9px;
+ background:#ecfff5;
+ border:1px solid #8bdfba;
+ color:#08784e;
+ font-size:14px;
+ font-weight:700
+}
+
+.status.error{
+ background:#fff0f0;
+ border-color:#e0a4a4;
+ color:#b3261e
+}
+
+.status.loading{
+ background:#eef7ff;
+ border-color:#9bc8eb;
+ color:#07558b
+}
+
+/* =========================================================
+   FILTROS GENERALES
+========================================================= */
+
+.filters{
+ background:#fff;
+ border:1px solid var(--border);
+ border-radius:11px;
+ padding:12px;
+ margin-bottom:12px;
+ display:grid;
+ grid-template-columns:repeat(8,minmax(105px,1fr)) auto;
+ gap:9px;
+ box-shadow:0 3px 12px rgba(0,0,0,.05)
+}
+
+.filter label{
+ display:block;
+ color:var(--muted);
+ font-size:10px;
+ font-weight:900;
+ margin-bottom:5px;
+ text-transform:uppercase
+}
+
+.filter select,
+.multi-button{
+ width:100%;
+ height:38px;
+ border:1px solid #ccd6de;
+ border-radius:7px;
+ background:#fff;
+ padding:0 9px;
+ font-size:12px
+}
+
+.clear{
+ height:38px;
+ align-self:end;
+ border:0;
+ border-radius:7px;
+ background:#e7eef3;
+ padding:0 17px;
+ cursor:pointer;
+ font-weight:800
+}
+
+.clear:hover{
+ background:#d9e3e9
+}
+
+/* =========================================================
+   MULTISELECCION
+========================================================= */
+
+.multi-select{
+ position:relative
+}
+
+.multi-button{
+ text-align:left;
+ cursor:pointer;
+ overflow:hidden;
+ white-space:nowrap;
+ text-overflow:ellipsis
+}
+
+.multi-dropdown{
+ display:none;
+ position:absolute;
+ top:43px;
+ left:0;
+ width:350px;
+ background:#fff;
+ border:1px solid #ccd6de;
+ border-radius:9px;
+ box-shadow:0 10px 25px rgba(0,0,0,.22);
+ z-index:2000;
+ padding:10px
+}
+
+.multi-dropdown.open{
+ display:block
+}
+
+.multi-search{
+ width:100%;
+ height:35px;
+ border:1px solid #ccd6de;
+ border-radius:7px;
+ padding:0 10px;
+ margin-bottom:8px
+}
+
+.multi-actions{
+ display:flex;
+ gap:7px;
+ margin-bottom:8px
+}
+
+.multi-actions button,
+.multi-apply{
+ border:0;
+ border-radius:6px;
+ padding:7px 10px;
+ cursor:pointer;
+ font-size:11px;
+ font-weight:800
+}
+
+.multi-actions button{
+ background:#e7eef3
+}
+
+.multi-apply{
+ background:var(--blue);
+ color:#fff
+}
+
+.multi-list{
+ max-height:300px;
+ overflow:auto;
+ border-top:1px solid var(--border);
+ border-bottom:1px solid var(--border)
+}
+
+.multi-item{
+ display:flex;
+ gap:8px;
+ align-items:center;
+ padding:7px 4px;
+ font-size:11px;
+ font-weight:700
+}
+
+.multi-footer{
+ padding-top:8px;
+ display:flex;
+ justify-content:flex-end
+}
+
+.multi-select.estado-select .multi-dropdown{
+ width:240px
+}
+
+.multi-select.estado-select .multi-list{
+ max-height:220px
+}
+
+.multi-select.estado-select .multi-item{
+ padding:8px 5px
+}
+
+/* =========================================================
+   VISTAS
+========================================================= */
+
+.view{
+ display:none
+}
+
+.view.active{
+ display:block
+}
+
+/* =========================================================
+   KPI
+========================================================= */
+
+.kpis{
+ display:grid;
+ grid-template-columns:repeat(6,1fr);
+ gap:12px;
+ margin-bottom:12px
+}
+
+.kpi{
+ background:#fff;
+ border:1px solid var(--border);
+ border-left:5px solid var(--blue);
+ border-radius:11px;
+ padding:14px;
+ box-shadow:0 3px 12px rgba(0,0,0,.05)
+}
+
+.kpi.green{
+ border-left-color:var(--green)
+}
+
+.kpi.red{
+ border-left-color:var(--red)
+}
+
+.kpi.purple{
+ border-left-color:var(--purple)
+}
+
+.kpi-title{
+ color:var(--muted);
+ font-size:10px;
+ font-weight:900;
+ text-transform:uppercase;
+ margin-bottom:7px
+}
+
+.kpi-value{
+ color:var(--navy);
+ font-size:24px;
+ font-weight:900
+}
+
+.kpi-sub{
+ margin-top:6px;
+ color:var(--muted);
+ font-size:9px
+}
+
+/* =========================================================
+   CARDS
+========================================================= */
+
+.grid{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:12px;
+ margin-bottom:12px
+}
+
+.card{
+ background:#fff;
+ border:1px solid var(--border);
+ border-radius:12px;
+ box-shadow:0 3px 12px rgba(0,0,0,.05);
+ padding:14px
+}
+
+.card h2,
+.card h3{
+ margin:0 0 5px;
+ color:var(--navy)
+}
+
+.card h2{
+ font-size:17px
+}
+
+.card h3{
+ font-size:16px
+}
+
+.card p{
+ margin:0 0 10px;
+ color:var(--muted);
+ font-size:10px
+}
+
+.chart{
+ position:relative;
+ height:315px
+}
+
+.chart.tall{
+ height:420px
+}
+
+.table-card{
+ margin-bottom:12px
+}
+
+.table-scroll{
+ width:100%;
+ overflow-x:auto
+}
+
+table{
+ width:100%;
+ border-collapse:collapse;
+ font-size:10px
+}
+
+thead th{
+ background:var(--navy);
+ color:#fff;
+ padding:8px;
+ white-space:nowrap;
+ text-align:right
+}
+
+thead th:first-child{
+ text-align:left
+}
+
+tbody td{
+ padding:8px;
+ border-bottom:1px solid var(--border);
+ text-align:right;
+ white-space:nowrap
+}
+
+tbody td:first-child{
+ text-align:left
+}
+
+tbody tr:nth-child(even){
+ background:#f2f6f8
+}
+
+tbody tr:hover{
+ background:#e8f2f8
+}
+
+.total-row{
+ background:#dceef7!important;
+ font-weight:900
+}
+
+.good{
+ color:var(--green);
+ font-weight:900
+}
+
+.bad{
+ color:var(--red);
+ font-weight:900
+}
+
+/* =========================================================
+   TIPO CUOTA
+========================================================= */
+
+.tipo-controls{
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ gap:55px;
+ margin:14px 0 17px;
+ flex-wrap:wrap
+}
+
+.tipo-filter-block{
+ display:flex;
+ align-items:center;
+ gap:9px
+}
+
+.date-controls,
+.payment-buttons{
+ display:flex;
+ align-items:center;
+ gap:7px
+}
+
+.date-controls label{
+ color:var(--muted);
+ font-size:9px;
+ font-weight:900
+}
+
+.date-controls input{
+ height:34px;
+ border:1px solid #ccd6de;
+ border-radius:6px;
+ padding:0 7px
+}
+
+.payment-buttons button{
+ height:34px;
+ border:1px solid #ccd6de;
+ border-radius:6px;
+ background:#f4f7f9;
+ padding:0 14px;
+ cursor:pointer;
+ font-size:10px;
+ font-weight:900
+}
+
+.payment-buttons button.active{
+ background:var(--navy);
+ color:#fff;
+ border-color:var(--navy)
+}
+
+/* =========================================================
+   MENSAJES
+========================================================= */
+
+.empty{
+ padding:28px;
+ text-align:center;
+ color:var(--muted)
+}
+
+.alert{
+ padding:10px;
+ border-radius:7px;
+ margin-bottom:7px;
+ font-size:11px
+}
+
+.alert.green{
+ background:#e9f7ef;
+ color:#176b3a
+}
+
+.alert.yellow{
+ background:#fff8e2;
+ color:#8a6200
+}
+
+.alert.red{
+ background:#ffecee;
+ color:#9b2335
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media(max-width:1400px){
+
+ .filters{
+  grid-template-columns:repeat(4,1fr)
+ }
+
+ .kpis{
+  grid-template-columns:repeat(3,1fr)
+ }
+}
+
+@media(max-width:1000px){
+
+ .sidebar{
+  width:190px
+ }
+
+ .main{
+  margin-left:190px;
+  width:calc(100% - 190px)
+ }
+
+ .grid{
+  grid-template-columns:1fr
+ }
+
+ .kpis{
+  grid-template-columns:repeat(2,1fr)
+ }
+}
+
+@media(max-width:700px){
+
+ .sidebar{
+  position:relative;
+  width:100%
+ }
+
+ .app{
+  display:block
+ }
+
+ .main{
+  margin-left:0;
+  width:100%
+ }
+
+ .filters{
+  grid-template-columns:1fr
+ }
+
+ .kpis{
+  grid-template-columns:1fr
+ }
+
+ .tipo-controls{
+  flex-direction:column;
+  gap:15px
+ }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- =======================================================
+     SIDEBAR
+======================================================= -->
+
+<aside class="sidebar">
+
+ <div class="logo">
+  MAF /<br>
+  RECUPERO
+  <small>Command Center</small>
+ </div>
+
+ <button class="nav-btn active" data-view="ejecutivo">
+  📊 Ejecutivo
+ </button>
+
+ <button class="nav-btn" data-view="recupero">
+  💰 Recupero
+ </button>
+
+ <button class="nav-btn" data-view="gestion">
+  📞 Gestión
+ </button>
+
+ <button class="nav-btn" data-view="cartera">
+  📁 Cartera / Riesgo
+ </button>
+
+ <button class="nav-btn" data-view="asesores">
+  👥 Asesores
+ </button>
+
+ <button class="nav-btn" data-view="tramos">
+  🎯 Tramos -10 a 90
+ </button>
+
+</aside>
+
+<!-- =======================================================
+     MAIN
+======================================================= -->
+
+<main class="main">
+
+ <div class="header">
+
+  <div>
+
+   <h1>
+    Command Center MAF / Recupero
+   </h1>
+
+   <small>
+    Análisis ejecutivo de recuperación y gestión.
+   </small>
+
+  </div>
+
+  <div class="file-area">
+
+   <label class="file-button" for="fileInput">
+    Seleccionar archivo
+   </label>
+
+   <input
+    id="fileInput"
+    type="file"
+    accept=".xlsx,.xls,.csv"
+   >
+
+   <span id="fileName">
+    Cargando archivo...
+   </span>
+
+  </div>
+
+ </div>
+
+ <div id="status" class="status loading">
+  Cargando automáticamente maf_2_v5.xlsx...
+ </div>
+
+ <!-- =====================================================
+      FILTROS GENERALES
+ ====================================================== -->
+
+ <div class="filters">
+
+  <div class="filter">
+   <label>MES</label>
+   <select id="fMes">
+    <option value="__ALL__">Todos</option>
+   </select>
+  </div>
+
+  <div class="filter">
+   <label>CICLO2</label>
+   <select id="fCiclo">
+    <option value="__ALL__">Todos</option>
+   </select>
+  </div>
+
+  <div class="filter">
+   <label>TRAMO CARTERA</label>
+   <select id="fTramo">
+    <option value="__ALL__">Todos</option>
+   </select>
+  </div>
+
+  <!-- ASESOR MULTISELECCIÓN -->
+
+  <div class="filter">
+
+   <label>ASESOR ASIGN</label>
+
+   <div class="multi-select">
+
+    <button
+     id="asesorButton"
+     class="multi-button"
+     type="button"
+    >
+     Todos
+    </button>
+
+    <div
+     id="asesorDropdown"
+     class="multi-dropdown"
+    >
+
+     <input
+      id="asesorSearch"
+      class="multi-search"
+      placeholder="Buscar asesor..."
+     >
+
+     <div class="multi-actions">
+
+      <button
+       id="selectAllAsesores"
+       type="button"
+      >
+       Seleccionar todos
+      </button>
+
+      <button
+       id="clearAsesores"
+       type="button"
+      >
+       Limpiar
+      </button>
+
+     </div>
+
+     <div
+      id="asesorList"
+      class="multi-list"
+     ></div>
+
+     <div class="multi-footer">
+
+      <button
+       id="applyAsesores"
+       class="multi-apply"
+       type="button"
+      >
+       Aplicar
+      </button>
+
+     </div>
+
+    </div>
+
+   </div>
+
+  </div>
+
+  <div class="filter">
+   <label>CALIFICACION SBS</label>
+
+   <select id="fSbs">
+    <option value="__ALL__">Todos</option>
+   </select>
+  </div>
+
+  <div class="filter">
+   <label>PAGO / RESPP</label>
+
+   <select id="fPago">
+    <option value="__ALL__">Todos</option>
+   </select>
+  </div>
+
+  <div class="filter">
+   <label>TIPO CUOTA</label>
+
+   <select id="fTipo">
+    <option value="__ALL__">Todos</option>
+   </select>
+  </div>
+
+  <!-- ESTADO MULTISELECCIÓN -->
+
+  <div class="filter">
+
+   <label>ESTADO</label>
+
+   <div class="multi-select estado-select">
+
+    <button
+     id="estadoButton"
+     class="multi-button"
+     type="button"
+    >
+     Todos
+    </button>
+
+    <div
+     id="estadoDropdown"
+     class="multi-dropdown"
+    >
+
+     <div class="multi-actions">
+
+      <button
+       id="selectAllEstados"
+       type="button"
+      >
+       Seleccionar todos
+      </button>
+
+      <button
+       id="clearEstados"
+       type="button"
+      >
+       Limpiar
+      </button>
+
+     </div>
+
+     <div
+      id="estadoList"
+      class="multi-list"
+     ></div>
+
+     <div class="multi-footer">
+
+      <button
+       id="applyEstados"
+       class="multi-apply"
+       type="button"
+      >
+       Aplicar
+      </button>
+
+     </div>
+
+    </div>
+
+   </div>
+
+  </div>
+
+  <button
+   id="clearBtn"
+   class="clear"
+   type="button"
+  >
+   Limpiar
+  </button>
+
+ </div>
+
+ <!-- =====================================================
+      VISTAS
+ ====================================================== -->
+
+ <section
+  id="ejecutivo"
+  class="view active"
+ ></section>
+
+ <section
+  id="recupero"
+  class="view"
+ ></section>
+
+ <section
+  id="gestion"
+  class="view"
+ ></section>
+
+ <section
+  id="cartera"
+  class="view"
+ ></section>
+
+ <section
+  id="asesores"
+  class="view"
+ ></section>
+
+ <section
+  id="tramos"
+  class="view"
+ ></section>
+
+</main>
+
+</div>
+
+<script>
+"use strict";
+
+/* =========================================================
+   CONFIGURACIÓN GITHUB
+========================================================= */
+
+/*
+   IMPORTANTE:
+
+   index.html
+   maf_2_v5.xlsx
+
+   deben estar en la misma carpeta del repositorio.
+
+   Si posteriormente cambias el nombre del Excel,
+   solamente modifica EXCEL_FILE.
+*/
+
+const EXCEL_FILE = "./maf_2_v5.xlsx";
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+let DATA = [];
+let HEADERS = [];
+let COL = {};
+let CHARTS = {};
+
+let selectedAsesores = new Set();
+let selectedEstados = new Set();
+
+let tipoFechaDesde = "";
+let tipoFechaHasta = "";
+let tipoPagoFiltro = "TODOS";
+
+
+const ORDEN_CICLO = [
+ "04",
+ "11",
+ "18",
+ "25"
+];
+
+const ORDEN_TRAMO = [
+ "PREVENTIVO",
+ "TRAMO 1",
+ "TRAMO 2",
+ "TRAMO 3"
+];
+
+const ORDEN_TIPO = [
+ "NORMAL",
+ "TAXI",
+ "BIGTICKET",
+ "BALON",
+ "1RA4TA5TA",
+ "TOP"
+];
+
+
+/* =========================================================
+   UTILIDADES
+========================================================= */
+
+function normalizar(v){
+
+ return String(v ?? "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g,"")
+  .replace(/[^A-Za-z0-9]/g,"")
+  .toUpperCase();
+
+}
+
+
+function texto(v){
+
+ return v == null
+  ? ""
+  : String(v).trim();
+
+}
+
+
+function numero(v){
+
+ if(v == null || v === "")
+  return 0;
+
+ if(typeof v === "number")
+  return Number.isFinite(v) ? v : 0;
+
+ let s = String(v)
+  .trim()
+  .replace(/\s/g,"")
+  .replace(/[$€£]/g,"");
+
+ if(
+  s.includes(",") &&
+  s.includes(".")
+ ){
+
+  if(
+   s.lastIndexOf(",") >
+   s.lastIndexOf(".")
+  ){
+
+   s = s
+    .replace(/\./g,"")
+    .replace(",",".")
+   ;
+
+  }else{
+
+   s = s.replace(/,/g,"");
+
+  }
+
+ }else if(
+  s.includes(",")
+ ){
+
+  s = s.replace(",",".");
+ }
+
+ const n = Number(s);
+
+ return Number.isFinite(n)
+  ? n
+  : 0;
+
+}
+
+
+function entero(v){
+
+ return new Intl.NumberFormat(
+  "es-PE",
+  {
+   maximumFractionDigits:0
+  }
+ ).format(numero(v));
+
+}
+
+
+function dinero(v){
+
+ return "$" +
+ new Intl.NumberFormat(
+  "en-US",
+  {
+   minimumFractionDigits:2,
+   maximumFractionDigits:2
+  }
+ ).format(numero(v));
+
+}
+
+
+function porcentaje(v){
+
+ return numero(v).toFixed(1) + "%";
+
+}
+
+
+function escapeHTML(v){
+
+ return String(v ?? "")
+  .replace(/&/g,"&amp;")
+  .replace(/</g,"&lt;")
+  .replace(/>/g,"&gt;")
+  .replace(/"/g,"&quot;")
+  .replace(/'/g,"&#039;");
+
+}
+
+
+/* =========================================================
+   COLUMNAS
+========================================================= */
+
+function valorColumna(row,indice){
+
+ if(
+  indice === undefined ||
+  indice === null ||
+  indice < 0
+ )
+  return "";
+
+ const nombre = HEADERS[indice];
+
+ return nombre
+  ? row[nombre]
+  : "";
+
+}
+
+
+function buscarColumna(nombres){
+
+ const buscadas =
+  nombres.map(normalizar);
+
+ let i =
+  HEADERS.findIndex(
+   h => buscadas.includes(normalizar(h))
+  );
+
+ if(i >= 0)
+  return i;
+
+ return HEADERS.findIndex(
+  h => {
+
+   const x = normalizar(h);
+
+   return buscadas.some(
+    b =>
+     x.includes(b) ||
+     b.includes(x)
+   );
+
+  }
+ );
+
+}
+
+
+function construirMapa(){
+
+ COL.MES =
+  buscarColumna(["MES"]);
+
+ COL.CICLO =
+  buscarColumna(["CICLO2"]);
+
+ COL.TRAMO =
+  buscarColumna(["TRAMO_CARTERA"]);
+
+ COL.ASESOR =
+  buscarColumna(["ASESOR_ASIGN"]);
+
+ COL.SBS =
+  buscarColumna(["CALIFICACION_SBS"]);
+
+ COL.PAGO =
+  buscarColumna(["RESPP"]);
+
+ COL.ESTADO =
+  buscarColumna(["ESTADO"]);
+
+ COL.FREQ =
+  buscarColumna(["CANT_VECES_PAGO_HIS"]);
+
+ COL.TIPO =
+  buscarColumna(["TIPO_CUOTA"]);
+
+ COL.OP =
+  buscarColumna(["OPERACION"]);
+
+ COL.SOCIO =
+  buscarColumna([
+   "UNICO SOCIO",
+   "UNICO_SOCIO"
+  ]);
+
+ COL.CARTERA =
+  buscarColumna([
+   "CUOTA_DOLARIZADA"
+  ]);
+
+ COL.RECUPERADO =
+  buscarColumna([
+   "MONTO_PAGO_DOLARIZADO"
+  ]);
+
+ COL.FECHA_GESTION =
+  buscarColumna([
+   "FECHA_GESTION"
+  ]);
+
+ COL.GEST_CALL =
+  buscarColumna([
+   "CANT_GEST_CALL"
+  ]);
+
+ COL.PROMESA_CALL =
+  buscarColumna([
+   "CANT_PROMESA_CALL"
+  ]);
+
+ COL.CONTAC_CALL =
+  buscarColumna([
+   "CANT_CONTAC_CALL"
+  ]);
+
+ COL.GEST_IVR =
+  buscarColumna([
+   "CANT_GEST_IVR"
+  ]);
+
+ COL.GEST_EMAIL =
+  buscarColumna([
+   "CANT_GEST_EMAIL"
+  ]);
+
+ COL.GEST_SMS =
+  buscarColumna([
+   "CANT_GEST_SMS"
+  ]);
+
+ COL.FLAG_SEGUIMIENTO =
+  buscarColumna([
+   "FLAG_SEGUIMIENTO"
+  ]);
+
+ COL.FLAG_PROMESA =
+  buscarColumna([
+   "FLAG_PROMESA"
+  ]);
+
+ COL.CONTACTO =
+  buscarColumna([
+   "CONTACTO"
+  ]);
+
+ COL.SIN_PAGO =
+  buscarColumna([
+   "SIN PAGO",
+   "SIN_PAGO"
+  ]);
+
+}
+
+
+function valorCampo(row,campo){
+
+ switch(campo){
+
+  case "MES":
+   return texto(
+    valorColumna(row,COL.MES)
+   );
+
+  case "CICLO":
+   return texto(
+    valorColumna(row,COL.CICLO)
+   ).padStart(2,"0");
+
+  case "TRAMO":
+   return texto(
+    valorColumna(row,COL.TRAMO)
+   ).toUpperCase();
+
+  case "ASESOR":
+   return texto(
+    valorColumna(row,COL.ASESOR)
+   );
+
+  case "SBS":
+   return texto(
+    valorColumna(row,COL.SBS)
+   );
+
+  case "TIPO":
+   return texto(
+    valorColumna(row,COL.TIPO)
+   ).toUpperCase();
+
+  case "PAGO":
+
+   return numero(
+    valorColumna(
+     row,
+     COL.RECUPERADO
+    )
+   ) > 0
+    ? "CON PAGO"
+    : "SIN PAGO";
+
+  case "ESTADO":
+   return texto(
+    valorColumna(row,COL.ESTADO)
+   );
+
+  case "FREQ":
+   return String(
+    numero(
+     valorColumna(
+      row,
+      COL.FREQ
+     )
+    )
+   );
+
+  default:
+   return "";
+ }
+
+}
+
+
+/* =========================================================
+   FECHAS
+========================================================= */
+
+function fechaNormalizada(v){
+
+ if(v == null || v === "")
+  return null;
+
+ if(
+  v instanceof Date &&
+  !isNaN(v)
+ ){
+
+  return new Date(
+   v.getFullYear(),
+   v.getMonth(),
+   v.getDate()
+  );
+
+ }
+
+ if(typeof v === "number"){
+
+  const p =
+   XLSX.SSF.parse_date_code(v);
+
+  if(p){
+
+   return new Date(
+    p.y,
+    p.m - 1,
+    p.d
+   );
+
+  }
+
+ }
+
+ const s =
+  String(v).trim();
+
+ let m =
+  s.match(
+   /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/
+  );
+
+ if(m){
+
+  return new Date(
+   +m[3],
+   +m[2] - 1,
+   +m[1]
+  );
+
+ }
+
+ m =
+  s.match(
+   /^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})/
+  );
+
+ if(m){
+
+  return new Date(
+   +m[1],
+   +m[2] - 1,
+   +m[3]
+  );
+
+ }
+
+ const d = new Date(s);
+
+ return isNaN(d)
+  ? null
+  : new Date(
+     d.getFullYear(),
+     d.getMonth(),
+     d.getDate()
+    );
+
+}
+
+
+/* =========================================================
+   FILTROS GENERALES
+========================================================= */
+
+function obtenerFiltrados(){
+
+ const fMes =
+  document.getElementById("fMes").value;
+
+ const fCiclo =
+  document.getElementById("fCiclo").value;
+
+ const fTramo =
+  document.getElementById("fTramo").value;
+
+ const fSbs =
+  document.getElementById("fSbs").value;
+
+ const fPago =
+  document.getElementById("fPago").value;
+
+ const fTipo =
+  document.getElementById("fTipo").value;
+
+
+ return DATA.filter(row=>{
+
+  if(
+   fMes !== "__ALL__" &&
+   valorCampo(row,"MES") !== fMes
+  )
+   return false;
+
+  if(
+   fCiclo !== "__ALL__" &&
+   valorCampo(row,"CICLO") !== fCiclo
+  )
+   return false;
+
+  if(
+   fTramo !== "__ALL__" &&
+   valorCampo(row,"TRAMO") !== fTramo
+  )
+   return false;
+
+  if(
+   fSbs !== "__ALL__" &&
+   valorCampo(row,"SBS") !== fSbs
+  )
+   return false;
+
+  if(
+   fPago !== "__ALL__" &&
+   valorCampo(row,"PAGO") !== fPago
+  )
+   return false;
+
+  if(
+   fTipo !== "__ALL__" &&
+   valorCampo(row,"TIPO") !== fTipo
+  )
+   return false;
+
+  if(
+   selectedEstados.size > 0 &&
+   !selectedEstados.has(
+    valorCampo(row,"ESTADO")
+   )
+  )
+   return false;
+
+  if(
+   selectedAsesores.size > 0 &&
+   !selectedAsesores.has(
+    valorCampo(row,"ASESOR")
+   )
+  )
+   return false;
+
+  return true;
+
+ });
+
+}
+
+
+/* =========================================================
+   MÉTRICAS
+========================================================= */
+
+function calcularMetricas(rows){
+
+ let cartera = 0;
+ let recuperado = 0;
+ let qOperation = 0;
+ let qUnico = 0;
+ let qConPago = 0;
+ let qSinPago = 0;
+
+ let seguimientos = 0;
+ let promesas = 0;
+ let contactosDirectos = 0;
+
+
+ rows.forEach(row=>{
+
+  if(
+   texto(
+    valorColumna(
+     row,
+     COL.OP
+    )
+   ) !== ""
+  )
+   qOperation++;
+
+  qUnico += numero(
+   valorColumna(
+    row,
+    COL.SOCIO
+   )
+  );
+
+  cartera += numero(
+   valorColumna(
+    row,
+    COL.CARTERA
+   )
+  );
+
+  const pago =
+   numero(
+    valorColumna(
+     row,
+     COL.RECUPERADO
+    )
+   );
+
+  recuperado += pago;
+
+  if(pago > 0)
+   qConPago++;
+  else
+   qSinPago++;
+
+  seguimientos += numero(
+   valorColumna(
+    row,
+    COL.FLAG_SEGUIMIENTO
+   )
+  );
+
+  promesas += numero(
+   valorColumna(
+    row,
+    COL.FLAG_PROMESA
+   )
+  );
+
+  contactosDirectos += numero(
+   valorColumna(
+    row,
+    COL.CONTACTO
+   )
+  );
+
+ });
+
+
+ return {
+
+  cartera,
+  recuperado,
+  saldo:cartera-recuperado,
+
+  qOperation,
+  qUnico,
+
+  qConPago,
+  qSinPago,
+
+  seguimientos,
+  promesas,
+  contactosDirectos,
+
+  porcentajeRecuperacion:
+   cartera > 0
+    ? recuperado / cartera * 100
+    : 0,
+
+  porcentajeContactoDirecto:
+   qOperation > 0
+    ? contactosDirectos / qOperation * 100
+    : 0
+
+ };
+
+}
+
+
+/* =========================================================
+   PRODUCTIVIDAD / INTENSIDAD
+========================================================= */
+
+function calcularProductividadTipo(rows){
+
+ let cobertura = 0;
+
+ let promesa = 0;
+ let contacto = 0;
+ let ivr = 0;
+ let email = 0;
+ let sms = 0;
+
+ let operaciones = 0;
+
+
+ rows.forEach(row=>{
+
+  if(
+   texto(
+    valorColumna(
+     row,
+     COL.OP
+    )
+   ) !== ""
+  )
+   operaciones++;
+
+  cobertura += numero(
+   valorColumna(
+    row,
+    COL.GEST_CALL
+   )
+  );
+
+  promesa += numero(
+   valorColumna(
+    row,
+    COL.PROMESA_CALL
+   )
+  );
+
+  contacto += numero(
+   valorColumna(
+    row,
+    COL.CONTAC_CALL
+   )
+  );
+
+  ivr += numero(
+   valorColumna(
+    row,
+    COL.GEST_IVR
+   )
+  );
+
+  email += numero(
+   valorColumna(
+    row,
+    COL.GEST_EMAIL
+   )
+  );
+
+  sms += numero(
+   valorColumna(
+    row,
+    COL.GEST_SMS
+   )
+  );
+
+ });
+
+
+ /*
+  =========================================================
+  INTENSIDAD MARCADOR
+
+  CANT_GEST_CALL / Q_OPERATION
+  =========================================================
+ */
+
+ const intensidadMarcador =
+  operaciones > 0
+   ? cobertura / operaciones
+   : 0;
+
+
+ /*
+  =========================================================
+  MARCADOR VARIOS
+
+  PROMESA
+  + CONTACTO
+  + IVR
+  + EMAIL
+  + SMS
+
+  todo dividido entre Q_OPERATION
+  =========================================================
+ */
+
+ const varios =
+  promesa +
+  contacto +
+  ivr +
+  email +
+  sms;
+
+
+ const intensidadVarios =
+  operaciones > 0
+   ? varios / operaciones
+   : 0;
+
+
+ /*
+  =========================================================
+  INTENSIDAD GENERAL
+
+  CANT_GEST_CALL
+  +
+  MARCADOR VARIOS
+
+  dividido entre Q_OPERATION
+  =========================================================
+ */
+
+ const intensidadGeneral =
+  operaciones > 0
+   ? (cobertura + varios) / operaciones
+   : 0;
+
+
+ return {
+
+  cobertura,
+
+  intensidadGeneral,
+
+  intensidadMarcador,
+
+  intensidadVarios,
+
+  operaciones
+
+ };
+
+}
+
+
+/* =========================================================
+   AGRUPAR
+========================================================= */
+
+function agrupar(rows,campo){
+
+ const map = new Map();
+
+ rows.forEach(row=>{
+
+  const key =
+   valorCampo(row,campo);
+
+  if(!map.has(key))
+   map.set(key,[]);
+
+  map.get(key).push(row);
+
+ });
+
+ return map;
+
+}
+
+
+/* =========================================================
+   CHARTS
+========================================================= */
+
+function destruirChart(id){
+
+ if(CHARTS[id]){
+
+  try{
+   CHARTS[id].destroy();
+  }catch(e){}
+
+  delete CHARTS[id];
+
+ }
+
+}
+
+
+function etiquetaValor(v,formato){
+
+ if(formato === "dinero")
+  return dinero(v);
+
+ if(formato === "porcentaje")
+  return porcentaje(v);
+
+ return entero(v);
+
+}
+
+
+function graficoBarras(
+ id,
+ labels,
+ datasets,
+ formato="numero"
+){
+
+ destruirChart(id);
+
+ const canvas =
+  document.getElementById(id);
+
+ if(!canvas)
+  return;
+
+
+ CHARTS[id] =
+  new Chart(
+   canvas,
+   {
+    type:"bar",
+
+    data:{
+     labels,
+     datasets
+    },
+
+    plugins:[
+     ChartDataLabels
+    ],
+
+    options:{
+
+     responsive:true,
+     maintainAspectRatio:false,
+
+     layout:{
+      padding:{
+       top:30,
+       right:10,
+       left:5,
+       bottom:5
+      }
+     },
+
+     plugins:{
+
+      legend:{
+       display:true,
+       position:"top"
+      },
+
+      datalabels:{
+       display:true,
+       anchor:"end",
+       align:"top",
+       offset:2,
+       clamp:true,
+       clip:false,
+
+       font:{
+        size:9,
+        weight:"800"
+       },
+
+       formatter:v =>
+        etiquetaValor(
+         v,
+         formato
+        )
+      }
+
+     },
+
+     scales:{
+
+      y:{
+       beginAtZero:true,
+
+       ticks:{
+        callback:v =>
+         etiquetaValor(
+          v,
+          formato
+         )
+       }
+
+      }
+
+     }
+
+    }
+
+   }
+  );
+
+}
+
+
+function graficoDonut(
+ id,
+ labels,
+ values
+){
+
+ destruirChart(id);
+
+ const canvas =
+  document.getElementById(id);
+
+ if(!canvas)
+  return;
+
+
+ CHARTS[id] =
+  new Chart(
+   canvas,
+   {
+
+    type:"doughnut",
+
+    data:{
+     labels,
+
+     datasets:[
+      {
+       data:values
+      }
+     ]
+    },
+
+    plugins:[
+     ChartDataLabels
+    ],
+
+    options:{
+
+     responsive:true,
+     maintainAspectRatio:false,
+
+     plugins:{
+
+      legend:{
+       position:"top"
+      },
+
+      datalabels:{
+
+       font:{
+        size:11,
+        weight:"900"
+       },
+
+       formatter:(v,c)=>{
+
+        const total =
+         c.dataset.data.reduce(
+          (a,b)=>a+b,
+          0
+         );
+
+        return entero(v) +
+         "\n" +
+         (
+          total
+           ? v / total * 100
+           : 0
+         ).toFixed(1) +
+         "%";
+
+       }
+
+      }
+
+     }
+
+    }
+
+   }
+  );
+
+}
+
+
+function cardGrafico(
+ titulo,
+ descripcion,
+ id
+){
+
+ return `
+ <div class="card">
+
+  <h3>${titulo}</h3>
+
+  <p>${descripcion}</p>
+
+  <div class="chart">
+   <canvas id="${id}"></canvas>
+  </div>
+
+ </div>
+ `;
+
+}
+
+
+/* =========================================================
+   KPI
+========================================================= */
+
+function construirKPIs(m){
+
+ return `
+
+ <div class="kpis">
+
+  <div class="kpi">
+
+   <div class="kpi-title">
+    Cartera asignada
+   </div>
+
+   <div class="kpi-value">
+    ${dinero(m.cartera)}
+   </div>
+
+   <div class="kpi-sub">
+    CUOTA_DOLARIZADA
+   </div>
+
+  </div>
+
+
+  <div class="kpi green">
+
+   <div class="kpi-title">
+    Recuperado
+   </div>
+
+   <div class="kpi-value">
+    ${dinero(m.recuperado)}
+   </div>
+
+   <div class="kpi-sub">
+    MONTO_PAGO_DOLARIZADO
+   </div>
+
+  </div>
+
+
+  <div class="kpi green">
+
+   <div class="kpi-title">
+    % Recuperación
+   </div>
+
+   <div class="kpi-value">
+    ${porcentaje(
+     m.porcentajeRecuperacion
+    )}
+   </div>
+
+   <div class="kpi-sub">
+    Recuperado / Cartera
+   </div>
+
+  </div>
+
+
+  <div class="kpi red">
+
+   <div class="kpi-title">
+    Saldo pendiente
+   </div>
+
+   <div class="kpi-value">
+    ${dinero(m.saldo)}
+   </div>
+
+   <div class="kpi-sub">
+    Cartera - Recuperado
+   </div>
+
+  </div>
+
+
+  <div class="kpi purple">
+
+   <div class="kpi-title">
+    Q_OPERATION
+   </div>
+
+   <div class="kpi-value">
+    ${entero(m.qOperation)}
+   </div>
+
+   <div class="kpi-sub">
+    COUNT(OPERACION)
+   </div>
+
+  </div>
+
+
+  <div class="kpi red">
+
+   <div class="kpi-title">
+    Sin pago
+   </div>
+
+   <div class="kpi-value">
+    ${entero(m.qSinPago)}
+   </div>
+
+   <div class="kpi-sub">
+    ${porcentaje(
+     m.qOperation
+      ? m.qSinPago /
+        m.qOperation *
+        100
+      : 0
+    )}
+   </div>
+
+  </div>
+
+ </div>
+
+ `;
+
+}
+
+
+/* =========================================================
+   TABLA TRAMOS
+========================================================= */
+
+function tablaTramos(rows){
+
+ const grupos =
+  agrupar(rows,"TRAMO");
+
+
+ let html = `
+
+ <div class="table-scroll">
+
+ <table>
+
+ <thead>
+
+ <tr>
+
+  <th>Tramo</th>
+  <th>Cartera</th>
+  <th>Recuperado</th>
+  <th>% Rec.</th>
+  <th>Saldo</th>
+  <th>Q_OPERATION</th>
+  <th>Q_UNICO</th>
+  <th>Con pago</th>
+  <th>Sin pago</th>
+
+ </tr>
+
+ </thead>
+
+ <tbody>
+
+ `;
+
+
+ ORDEN_TRAMO.forEach(tramo=>{
+
+  if(!grupos.has(tramo))
+   return;
+
+  const m =
+   calcularMetricas(
+    grupos.get(tramo)
+   );
+
+
+  html += `
+
+  <tr>
+
+   <td>
+    <b>${escapeHTML(tramo)}</b>
+   </td>
+
+   <td>${dinero(m.cartera)}</td>
+
+   <td>${dinero(m.recuperado)}</td>
+
+   <td>${porcentaje(
+    m.porcentajeRecuperacion
+   )}</td>
+
+   <td>${dinero(m.saldo)}</td>
+
+   <td>${entero(m.qOperation)}</td>
+
+   <td>${entero(m.qUnico)}</td>
+
+   <td>${entero(m.qConPago)}</td>
+
+   <td>${entero(m.qSinPago)}</td>
+
+  </tr>
+
+  `;
+
+ });
+
+
+ return html +
+ `
+ </tbody>
+ </table>
+ </div>
+ `;
+
+}
+
+
+/* =========================================================
+   TABLA TRAMO + TIPO
+========================================================= */
+
+function tablaTramoTipo(rows){
+
+ let html = `
+
+ <div class="table-scroll">
+
+ <table>
+
+ <thead>
+
+ <tr>
+
+  <th>Tramo</th>
+  <th>TIPO_CUOTA</th>
+  <th>Cartera</th>
+  <th>Recuperado</th>
+  <th>% Rec.</th>
+  <th>Saldo</th>
+  <th>Q_OPERATION</th>
+  <th>Q_UNICO</th>
+  <th>Con pago</th>
+  <th>Sin pago</th>
+
+ </tr>
+
+ </thead>
+
+ <tbody>
+
+ `;
+
+
+ ORDEN_TRAMO.forEach(tramo=>{
+
+  ORDEN_TIPO.forEach(tipo=>{
+
+   const grupo =
+    rows.filter(
+     r =>
+      valorCampo(r,"TRAMO") === tramo &&
+      valorCampo(r,"TIPO") === tipo
+    );
+
+
+   if(!grupo.length)
+    return;
+
+
+   const m =
+    calcularMetricas(grupo);
+
+
+   html += `
+
+   <tr>
+
+    <td>
+     <b>${escapeHTML(tramo)}</b>
+    </td>
+
+    <td>
+     ${escapeHTML(tipo)}
+    </td>
+
+    <td>${dinero(m.cartera)}</td>
+
+    <td>${dinero(m.recuperado)}</td>
+
+    <td>${porcentaje(
+     m.porcentajeRecuperacion
+    )}</td>
+
+    <td>${dinero(m.saldo)}</td>
+
+    <td>${entero(m.qOperation)}</td>
+
+    <td>${entero(m.qUnico)}</td>
+
+    <td>${entero(m.qConPago)}</td>
+
+    <td>${entero(m.qSinPago)}</td>
+
+   </tr>
+
+   `;
+
+  });
+
+ });
+
+
+ return html +
+ `
+ </tbody>
+ </table>
+ </div>
+ `;
+
+}
+
+
+/* =========================================================
+   EJECUTIVO
+========================================================= */
+
+function renderEjecutivo(rows){
+
+ const m =
+  calcularMetricas(rows);
+
+ const grupos =
+  agrupar(rows,"TRAMO");
+
+ const labels =
+  ORDEN_TRAMO.filter(
+   x => grupos.has(x)
+  );
+
+
+ const ciclos =
+  agrupar(rows,"CICLO");
+
+ const cicloLabels =
+  ORDEN_CICLO.filter(
+   x => ciclos.has(x)
+  );
+
+
+ document.getElementById(
+  "ejecutivo"
+ ).innerHTML =
+
+ construirKPIs(m) +
+
+ `
+
+ <div class="grid">
+
+  ${cardGrafico(
+   "Recuperación por TRAMO_CARTERA",
+   "Orden fijo: PREVENTIVO → TRAMO 1 → TRAMO 2 → TRAMO 3.",
+   "chartTramo"
+  )}
+
+  ${cardGrafico(
+   "% recuperación por CICLO2",
+   "Orden fijo: 04 → 11 → 18 → 25.",
+   "chartCiclo"
+  )}
+
+ </div>
+
+
+ <div class="grid">
+
+  ${cardGrafico(
+   "Con pago vs sin pago",
+   "Con pago = MONTO_PAGO_DOLARIZADO > 0.",
+   "chartPago"
+  )}
+
+  ${cardGrafico(
+   "Recuperado por ASESOR_ASIGN",
+   "Ranking por monto recuperado.",
+   "chartAsesor"
+  )}
+
+ </div>
+
+
+ <div class="card table-card">
+
+  <h2>
+   Detalle por TRAMO_CARTERA
+  </h2>
+
+  <p>
+   Exposición, recuperación, saldo,
+   operaciones y socios únicos.
+  </p>
+
+  ${tablaTramos(rows)}
+
+ </div>
+
+
+ <div class="card table-card">
+
+  <h2>
+   Detalle por TRAMO_CARTERA + TIPO_CUOTA
+  </h2>
+
+  <p>
+   NORMAL → TAXI → BIGTICKET →
+   BALON → 1ra4ta5ta.
+  </p>
+
+  ${tablaTramoTipo(rows)}
+
+ </div>
+
+ `;
+
+
+ graficoBarras(
+  "chartTramo",
+  labels,
+
+  [
+   {
+    label:"Cartera USD",
+    data:
+     labels.map(
+      x =>
+       calcularMetricas(
+        grupos.get(x)
+       ).cartera
+     )
+   },
+
+   {
+    label:"Recuperado USD",
+    data:
+     labels.map(
+      x =>
+       calcularMetricas(
+        grupos.get(x)
+       ).recuperado
+     )
+   }
+  ],
+
+  "dinero"
+ );
+
+
+ graficoBarras(
+  "chartCiclo",
+  cicloLabels,
+
+  [
+   {
+    label:"% Recuperación",
+    data:
+     cicloLabels.map(
+      x =>
+       calcularMetricas(
+        ciclos.get(x)
+       ).porcentajeRecuperacion
+     )
+   }
+  ],
+
+  "porcentaje"
+ );
+
+
+ graficoDonut(
+  "chartPago",
+  [
+   "Con pago",
+   "Sin pago"
+  ],
+  [
+   m.qConPago,
+   m.qSinPago
+  ]
+ );
+
+
+ const asesores =
+  agrupar(rows,"ASESOR");
+
+
+ const ranking =
+  [...asesores.entries()]
+   .map(
+    ([a,d]) =>
+     [
+      a,
+      calcularMetricas(d).recuperado
+     ]
+   )
+   .sort(
+    (a,b) => b[1] - a[1]
+   )
+   .slice(0,15);
+
+
+ graficoBarras(
+  "chartAsesor",
+  ranking.map(x=>x[0]),
+
+  [
+   {
+    label:"Recuperado USD",
+    data:
+     ranking.map(x=>x[1])
+   }
+  ],
+
+  "dinero"
+ );
+
+}
+
+
+/* =========================================================
+   TIPO CUOTA
+========================================================= */
+
+function obtenerFiltradosTipoCuota(rows){
+
+ const desde =
+  tipoFechaDesde
+   ? new Date(
+      tipoFechaDesde +
+      "T00:00:00"
+     )
+   : null;
+
+
+ const hasta =
+  tipoFechaHasta
+   ? new Date(
+      tipoFechaHasta +
+      "T23:59:59"
+     )
+   : null;
+
+
+ return rows.filter(row=>{
+
+  if(desde || hasta){
+
+   const f =
+    fechaNormalizada(
+     valorColumna(
+      row,
+      COL.FECHA_GESTION
+     )
+    );
+
+   if(!f)
+    return false;
+
+   if(
+    desde &&
+    f < desde
+   )
+    return false;
+
+   if(
+    hasta &&
+    f > hasta
+   )
+    return false;
+
+  }
+
+
+  const pago =
+   numero(
+    valorColumna(
+     row,
+     COL.RECUPERADO
+    )
+   );
+
+
+  if(
+   tipoPagoFiltro === "CON PAGO" &&
+   pago <= 0
+  )
+   return false;
+
+
+  if(
+   tipoPagoFiltro === "SIN PAGO" &&
+   pago > 0
+  )
+   return false;
+
+
+  return true;
+
+ });
+
+}
+
+
+/* =========================================================
+   CONTROLES TIPO CUOTA
+========================================================= */
+
+function controlesTipoCuota(){
+
+ return `
+
+ <div class="tipo-controls">
+
+  <div class="tipo-filter-block">
+
+   <div class="date-controls">
+
+    <label>
+     DESDE
+    </label>
+
+    <input
+     id="tipoFechaDesde"
+     type="date"
+     value="${tipoFechaDesde}"
+    >
+
+    <label>
+     HASTA
+    </label>
+
+    <input
+     id="tipoFechaHasta"
+     type="date"
+     value="${tipoFechaHasta}"
+    >
+
+   </div>
+
+  </div>
+
+
+  <div class="tipo-filter-block">
+
+   <div class="payment-buttons">
+
+    <button
+     type="button"
+     data-pago-tipo="TODOS"
+     class="${
+      tipoPagoFiltro === "TODOS"
+       ? "active"
+       : ""
+     }"
+    >
+     TODOS
+    </button>
+
+    <button
+     type="button"
+     data-pago-tipo="CON PAGO"
+     class="${
+      tipoPagoFiltro === "CON PAGO"
+       ? "active"
+       : ""
+     }"
+    >
+     CON PAGO
+    </button>
+
+    <button
+     type="button"
+     data-pago-tipo="SIN PAGO"
+     class="${
+      tipoPagoFiltro === "SIN PAGO"
+       ? "active"
+       : ""
+     }"
+    >
+     SIN PAGO
+    </button>
+
+   </div>
+
+  </div>
+
+ </div>
+
+ `;
+
+}
+
+
+/* =========================================================
+   TABLA TIPO CUOTA
+========================================================= */
+
+function tablaTipoCuota(rows){
+
+ const grupos =
+  agrupar(rows,"TIPO");
+
+
+ const tipos =
+  [...grupos.keys()]
+   .filter(Boolean)
+   .sort((a,b)=>{
+
+    const ia =
+     ORDEN_TIPO.indexOf(a);
+
+    const ib =
+     ORDEN_TIPO.indexOf(b);
+
+    if(
+     ia >= 0 &&
+     ib >= 0
+    )
+     return ia - ib;
+
+    if(ia >= 0)
+     return -1;
+
+    if(ib >= 0)
+     return 1;
+
+    return a.localeCompare(
+     b,
+     "es"
+    );
+
+   });
+
+
+ let html = `
+
+ <div class="table-scroll">
+
+ <table>
+
+ <thead>
+
+ <tr>
+
+  <th>TIPO_CUOTA</th>
+  <th>Cartera</th>
+  <th>Recuperado</th>
+  <th>% Rec.</th>
+  <th>Saldo</th>
+  <th>Q_OPERATION</th>
+  <th>Q_UNICO</th>
+  <th>Con pago</th>
+  <th>Sin pago</th>
+
+  <th>
+   Cobertura cartera
+  </th>
+
+  <th>
+   Intensidad General
+  </th>
+
+  <th>
+   Intensidad Marcador
+  </th>
+
+  <th>
+   Intensidad Marcador varios
+  </th>
+
+ </tr>
+
+ </thead>
+
+ <tbody>
+
+ `;
+
+
+ tipos.forEach(tipo=>{
+
+  const g =
+   grupos.get(tipo);
+
+  const m =
+   calcularMetricas(g);
+
+  const p =
+   calcularProductividadTipo(g);
+
+
+  html += `
+
+  <tr>
+
+   <td>
+    <b>${escapeHTML(tipo)}</b>
+   </td>
+
+   <td>
+    ${dinero(m.cartera)}
+   </td>
+
+   <td>
+    ${dinero(m.recuperado)}
+   </td>
+
+   <td>
+    ${porcentaje(
+     m.porcentajeRecuperacion
+    )}
+   </td>
+
+   <td>
+    ${dinero(m.saldo)}
+   </td>
+
+   <td>
+    ${entero(m.qOperation)}
+   </td>
+
+   <td>
+    ${entero(m.qUnico)}
+   </td>
+
+   <td>
+    ${entero(m.qConPago)}
+   </td>
+
+   <td>
+    ${entero(m.qSinPago)}
+   </td>
+
+   <td>
+    ${entero(p.cobertura)}
+   </td>
+
+   <td>
+    ${p.intensidadGeneral.toFixed(2)}
+   </td>
+
+   <td>
+    ${p.intensidadMarcador.toFixed(2)}
+   </td>
+
+   <td>
+    ${p.intensidadVarios.toFixed(2)}
+   </td>
+
+  </tr>
+
+  `;
+
+ });
+
+
+ if(!tipos.length){
+
+  html += `
+
+  <tr>
+
+   <td
+    colspan="13"
+    class="empty"
+   >
+    No existen registros
+    para los filtros seleccionados.
+   </td>
+
+  </tr>
+
+  `;
+
+ }
+
+
+ return html +
+
+ `
+
+ </tbody>
+
+ </table>
+
+ </div>
+
+ `;
+
+}
+
+
+/* =========================================================
+   RENDER TIPO CUOTA
+========================================================= */
+
+function renderTablaTipoCuota(rows){
+
+ const tipoRows =
+  obtenerFiltradosTipoCuota(rows);
+
+
+ return `
+
+ <div class="card table-card tipo-panel">
+
+  <h2>
+   Recuperación por TIPO_CUOTA
+  </h2>
+
+  <p>
+   Detalle monetario y operativo
+   por tipo de cuota.
+  </p>
+
+  ${controlesTipoCuota()}
+
+  ${tablaTipoCuota(tipoRows)}
+
+ </div>
+
+ `;
+
+}
+
+
+function refrescarTipoCuota(){
+
+ const recupero =
+  document.getElementById(
+   "recupero"
+  );
+
+ const panel =
+  recupero.querySelector(
+   ".tipo-panel"
+  );
+
+
+ if(!panel){
+
+  renderRecupero(
+   obtenerFiltrados()
+  );
+
+  return;
+
+ }
+
+
+ panel.outerHTML =
+  renderTablaTipoCuota(
+   obtenerFiltrados()
+  );
+
+
+ activarFiltrosTipoCuota();
+
+}
+
+
+function activarFiltrosTipoCuota(){
+
+ const d =
+  document.getElementById(
+   "tipoFechaDesde"
+  );
+
+ const h =
+  document.getElementById(
+   "tipoFechaHasta"
+  );
+
+
+ if(d){
+
+  d.onchange =
+   function(){
+
+    tipoFechaDesde =
+     this.value;
+
+    refrescarTipoCuota();
+
+   };
+
+ }
+
+
+ if(h){
+
+  h.onchange =
+   function(){
+
+    tipoFechaHasta =
+     this.value;
+
+    refrescarTipoCuota();
+
+   };
+
+ }
+
+
+ document
+  .querySelectorAll(
+   "[data-pago-tipo]"
+  )
+  .forEach(b=>{
+
+   b.onclick =
+    function(){
+
+     tipoPagoFiltro =
+      this.dataset.pagoTipo;
+
+     refrescarTipoCuota();
+
+    };
+
+  });
+
+}
+
+
+/* =========================================================
+   RECUPERO
+========================================================= */
+
+function renderRecupero(rows){
+
+ const m =
+  calcularMetricas(rows);
+
+
+ const gruposTipo =
+  agrupar(rows,"TIPO");
+
+
+ const labelsTipo =
+  [...gruposTipo.keys()]
+   .filter(Boolean)
+   .sort((a,b)=>{
+
+    const ia =
+     ORDEN_TIPO.indexOf(a);
+
+    const ib =
+     ORDEN_TIPO.indexOf(b);
+
+    if(
+     ia >= 0 &&
+     ib >= 0
+    )
+     return ia - ib;
+
+    if(ia >= 0)
+     return -1;
+
+    if(ib >= 0)
+     return 1;
+
+    return a.localeCompare(
+     b,
+     "es"
+    );
+
+   });
+
+
+ /*
+  FRECUENCIA HISTÓRICA
+  se mantiene solamente como gráfico
+  en la vista Recupero.
+ */
+
+ const gruposFreq =
+  agrupar(rows,"FREQ");
+
+
+ const freq =
+  [...gruposFreq.entries()]
+   .sort(
+    (a,b) =>
+     Number(a[0]) -
+     Number(b[0])
+   );
+
+
+ document.getElementById(
+  "recupero"
+ ).innerHTML =
+
+ construirKPIs(m) +
+
+ `
+
+ <div class="grid">
+
+  ${cardGrafico(
+   "Recuperación por TIPO_CUOTA",
+   "Cartera y recuperado por tipo de cuota.",
+   "chartTipo"
+  )}
+
+  ${cardGrafico(
+   "Frecuencia histórica de pago",
+   "Operaciones por CANT_VECES_PAGO_HIS.",
+   "chartFreq"
+  )}
+
+ </div>
+
+ ` +
+
+ renderTablaTipoCuota(rows);
+
+
+ graficoBarras(
+  "chartTipo",
+  labelsTipo,
+
+  [
+   {
+    label:"Cartera USD",
+
+    data:
+     labelsTipo.map(
+      x =>
+       calcularMetricas(
+        gruposTipo.get(x)
+       ).cartera
+     )
+   },
+
+   {
+    label:"Recuperado USD",
+
+    data:
+     labelsTipo.map(
+      x =>
+       calcularMetricas(
+        gruposTipo.get(x)
+       ).recuperado
+     )
+   }
+
+  ],
+
+  "dinero"
+ );
+
+
+ graficoBarras(
+  "chartFreq",
+  freq.map(x=>x[0]),
+
+  [
+   {
+    label:"Operaciones",
+
+    data:
+     freq.map(
+      x =>
+       calcularMetricas(
+        x[1]
+       ).qOperation
+     )
+   }
+  ],
+
+  "numero"
+ );
+
+
+ activarFiltrosTipoCuota();
+
+}
+
+
+/* =========================================================
+   GESTIÓN
+========================================================= */
+
+function renderGestion(rows){
+
+ const grupos =
+  agrupar(rows,"ASESOR");
+
+
+ let html = `
+
+ <div class="card table-card">
+
+  <h2>
+   Gestión por ASESOR_ASIGN
+  </h2>
+
+  <p>
+   Seguimientos, promesas
+   y contacto directo.
+  </p>
+
+  <div class="table-scroll">
+
+  <table>
+
+  <thead>
+
+  <tr>
+
+   <th>Asesor</th>
+   <th>Q_OPERATION</th>
+   <th>Seguimientos</th>
+   <th>Promesas</th>
+   <th>Contacto directo</th>
+   <th>% Contacto directo</th>
+
+  </tr>
+
+  </thead>
+
+  <tbody>
+
+ `;
+
+
+ [...grupos.entries()]
+  .sort(
+   (a,b) =>
+    calcularMetricas(b[1]).recuperado -
+    calcularMetricas(a[1]).recuperado
+  )
+  .forEach(
+   ([a,d])=>{
+
+    const m =
+     calcularMetricas(d);
+
+
+    html += `
+
+    <tr>
+
+     <td>
+      <b>${escapeHTML(a)}</b>
+     </td>
+
+     <td>
+      ${entero(m.qOperation)}
+     </td>
+
+     <td>
+      ${entero(m.seguimientos)}
+     </td>
+
+     <td>
+      ${entero(m.promesas)}
+     </td>
+
+     <td>
+      ${entero(m.contactosDirectos)}
+     </td>
+
+     <td>
+      ${porcentaje(
+       m.porcentajeContactoDirecto
+      )}
+     </td>
+
+    </tr>
+
+    `;
+
+   }
+  );
+
+
+ document.getElementById(
+  "gestion"
+ ).innerHTML =
+
+ construirKPIs(
+  calcularMetricas(rows)
+ ) +
+
+ html +
+
+ `
+ </tbody>
+ </table>
+ </div>
+ </div>
+ `;
+
+}
+
+
+/* =========================================================
+   CARTERA
+========================================================= */
+
+function renderCartera(rows){
+
+ const grupos =
+  agrupar(rows,"SBS");
+
+
+ let html = `
+
+ <div class="card table-card">
+
+  <h2>
+   Detalle por CALIFICACION_SBS
+  </h2>
+
+  <p>
+   Cartera, recuperado, saldo,
+   operaciones y socios únicos.
+  </p>
+
+  <div class="table-scroll">
+
+  <table>
+
+  <thead>
+
+  <tr>
+
+   <th>SBS</th>
+   <th>Cartera</th>
+   <th>Recuperado</th>
+   <th>% Rec.</th>
+   <th>Saldo</th>
+   <th>Q_OPERATION</th>
+   <th>Q_UNICO</th>
+   <th>Con pago</th>
+   <th>Sin pago</th>
+
+  </tr>
+
+  </thead>
+
+  <tbody>
+
+ `;
+
+
+ [...grupos.entries()]
+  .sort(
+   (a,b) =>
+    calcularMetricas(b[1]).cartera -
+    calcularMetricas(a[1]).cartera
+  )
+  .forEach(
+   ([s,d])=>{
+
+    const m =
+     calcularMetricas(d);
+
+
+    html += `
+
+    <tr>
+
+     <td>
+      <b>${escapeHTML(s)}</b>
+     </td>
+
+     <td>
+      ${dinero(m.cartera)}
+     </td>
+
+     <td>
+      ${dinero(m.recuperado)}
+     </td>
+
+     <td>
+      ${porcentaje(
+       m.porcentajeRecuperacion
+      )}
+     </td>
+
+     <td>
+      ${dinero(m.saldo)}
+     </td>
+
+     <td>
+      ${entero(m.qOperation)}
+     </td>
+
+     <td>
+      ${entero(m.qUnico)}
+     </td>
+
+     <td>
+      ${entero(m.qConPago)}
+     </td>
+
+     <td>
+      ${entero(m.qSinPago)}
+     </td>
+
+    </tr>
+
+    `;
+
+   }
+  );
+
+
+ document.getElementById(
+  "cartera"
+ ).innerHTML =
+
+ construirKPIs(
+  calcularMetricas(rows)
+ ) +
+
+ html +
+
+ `
+ </tbody>
+ </table>
+ </div>
+ </div>
+ `;
+
+}
+
+
+/* =========================================================
+   ASESORES
+========================================================= */
+
+function renderAsesores(rows){
+
+ const grupos =
+  agrupar(rows,"ASESOR");
+
+
+ let html = `
+
+ <div class="card table-card">
+
+  <h2>
+   Ranking de ASESOR_ASIGN
+  </h2>
+
+  <p>
+   Ordenado por monto recuperado.
+  </p>
+
+  <div class="table-scroll">
+
+  <table>
+
+  <thead>
+
+  <tr>
+
+   <th>Asesor</th>
+   <th>Cartera</th>
+   <th>Recuperado</th>
+   <th>% Rec.</th>
+   <th>Q_OPERATION</th>
+   <th>Q_UNICO</th>
+   <th>Con pago</th>
+   <th>Sin pago</th>
+
+  </tr>
+
+  </thead>
+
+  <tbody>
+
+ `;
+
+
+ [...grupos.entries()]
+  .map(
+   ([a,d]) =>
+    [
+     a,
+     calcularMetricas(d)
+    ]
+  )
+  .sort(
+   (a,b) =>
+    b[1].recuperado -
+    a[1].recuperado
+  )
+  .forEach(
+   ([a,m])=>{
+
+    html += `
+
+    <tr>
+
+     <td>
+      <b>${escapeHTML(a)}</b>
+     </td>
+
+     <td>
+      ${dinero(m.cartera)}
+     </td>
+
+     <td>
+      ${dinero(m.recuperado)}
+     </td>
+
+     <td>
+      ${porcentaje(
+       m.porcentajeRecuperacion
+      )}
+     </td>
+
+     <td>
+      ${entero(m.qOperation)}
+     </td>
+
+     <td>
+      ${entero(m.qUnico)}
+     </td>
+
+     <td>
+      ${entero(m.qConPago)}
+     </td>
+
+     <td>
+      ${entero(m.qSinPago)}
+     </td>
+
+    </tr>
+
+    `;
+
+   }
+  );
+
+
+ document.getElementById(
+  "asesores"
+ ).innerHTML =
+
+ construirKPIs(
+  calcularMetricas(rows)
+ ) +
+
+ html +
+
+ `
+ </tbody>
+ </table>
+ </div>
+ </div>
+ `;
+
+}
+
+
+/* =========================================================
+   TRAMOS -10 A 90
+========================================================= */
+
+function renderTramos(rows){
+
+ const cfg = [
+
+  {
+   nombre:"TRAMO -10 AL 30",
+   origen:[
+    "PREVENTIVO",
+    "TRAMO 1"
+   ],
+   meta:96
+  },
+
+  {
+   nombre:"TRAMO 31 AL 60",
+   origen:[
+    "TRAMO 2"
+   ],
+   meta:60
+  },
+
+  {
+   nombre:"TRAMO 61 AL 90",
+   origen:[
+    "TRAMO 3"
+   ],
+   meta:35
+  }
+
+ ];
+
+
+ let totalC = 0;
+ let totalR = 0;
+ let totalO = 0;
+ let totalU = 0;
+
+ let filas = [];
+
+
+ cfg.forEach(c=>{
+
+  const g =
+   rows.filter(
+    r =>
+     c.origen.includes(
+      valorCampo(r,"TRAMO")
+     )
+   );
+
+
+  const m =
+   calcularMetricas(g);
+
+
+  const objetivo =
+   m.cartera *
+   c.meta /
+   100;
+
+
+  const diferencia =
+   m.recuperado -
+   objetivo;
+
+
+  const brecha =
+   m.porcentajeRecuperacion -
+   c.meta;
+
+
+  totalC += m.cartera;
+  totalR += m.recuperado;
+  totalO += m.qOperation;
+  totalU += m.qUnico;
+
+
+  filas.push({
+
+   nombre:c.nombre,
+   meta:c.meta,
+   m,
+   objetivo,
+   diferencia,
+   brecha
+
+  });
+
+ });
+
+
+ const pctTotal =
+  totalC > 0
+   ? totalR /
+     totalC *
+     100
+   : 0;
+
+
+ const objetivoTotal =
+  totalC *
+  0.65;
+
+
+ const diferenciaTotal =
+  totalR -
+  objetivoTotal;
+
+
+ document.getElementById(
+  "tramos"
+ ).innerHTML = `
+
+ <div class="card table-card">
+
+  <h2>
+   Recuperación ejecutiva -10 a 90
+  </h2>
+
+  <p>
+   PREVENTIVO + TRAMO 1 =
+   TRAMO -10 AL 30.
+   TRAMO 2 =
+   TRAMO 31 AL 60.
+   TRAMO 3 =
+   TRAMO 61 AL 90.
+  </p>
+
+  <div class="table-scroll">
+
+   <table>
+
+    <thead>
+
+     <tr>
+
+      <th>
+       Tramo ejecutivo
+      </th>
+
+      <th>
+       Cartera
+      </th>
+
+      <th>
+       Recuperado
+      </th>
+
+      <th>
+       % Real
+      </th>
+
+      <th>
+       Meta
+      </th>
+
+      <th>
+       Brecha
+      </th>
+
+      <th>
+       Recuperación objetivo
+      </th>
+
+      <th>
+       Diferencia recupero objetivo
+      </th>
+
+      <th>
+       Saldo
+      </th>
+
+      <th>
+       Q_OPERATION
+      </th>
+
+      <th>
+       Q_UNICO
+      </th>
+
+     </tr>
+
+    </thead>
+
+    <tbody>
+
+     ${filas.map(x=>`
+
+      <tr>
+
+       <td>
+        <b>
+         ${escapeHTML(x.nombre)}
+        </b>
+       </td>
+
+       <td>
+        ${dinero(x.m.cartera)}
+       </td>
+
+       <td>
+        ${dinero(x.m.recuperado)}
+       </td>
+
+       <td>
+        ${porcentaje(
+         x.m.porcentajeRecuperacion
+        )}
+       </td>
+
+       <td>
+        ${x.meta}%
+       </td>
+
+       <td
+        class="${
+         x.brecha >= 0
+          ? "good"
+          : "bad"
+        }"
+       >
+
+        ${
+         x.brecha >= 0
+          ? "+"
+          : ""
+        }
+
+        ${porcentaje(
+         x.brecha
+        )}
+
+       </td>
+
+       <td>
+        ${dinero(x.objetivo)}
+       </td>
+
+       <td
+        class="${
+         x.diferencia >= 0
+          ? "good"
+          : "bad"
+        }"
+       >
+
+        ${dinero(
+         x.diferencia
+        )}
+
+       </td>
+
+       <td>
+        ${dinero(x.m.saldo)}
+       </td>
+
+       <td>
+        ${entero(x.m.qOperation)}
+       </td>
+
+       <td>
+        ${entero(x.m.qUnico)}
+       </td>
+
+      </tr>
+
+     `).join("")}
+
+
+     <tr class="total-row">
+
+      <td>
+       TOTAL -10 AL 90
+      </td>
+
+      <td>
+       ${dinero(totalC)}
+      </td>
+
+      <td>
+       ${dinero(totalR)}
+      </td>
+
+      <td>
+       ${porcentaje(pctTotal)}
+      </td>
+
+      <td>
+       65%
+      </td>
+
+      <td
+       class="${
+        pctTotal >= 65
+         ? "good"
+         : "bad"
+       }"
+      >
+
+       ${
+        pctTotal >= 65
+         ? "+"
+         : ""
+       }
+
+       ${porcentaje(
+        pctTotal - 65
+       )}
+
+      </td>
+
+      <td>
+       ${dinero(
+        objetivoTotal
+       )}
+      </td>
+
+      <td
+       class="${
+        diferenciaTotal >= 0
+         ? "good"
+         : "bad"
+       }"
+      >
+
+       ${dinero(
+        diferenciaTotal
+       )}
+
+      </td>
+
+      <td>
+       ${dinero(
+        totalC - totalR
+       )}
+      </td>
+
+      <td>
+       ${entero(totalO)}
+      </td>
+
+      <td>
+       ${entero(totalU)}
+      </td>
+
+     </tr>
+
+    </tbody>
+
+   </table>
+
+  </div>
+
+ </div>
+
+
+ <!-- ===================================================
+      GRÁFICOS TRAMOS
+ ==================================================== -->
+
+ <div class="grid">
+
+  <div class="card">
+
+   <h3>
+    % recuperación vs meta
+   </h3>
+
+   <p>
+    Metas individuales:
+    96%, 60%, 35%.
+    Meta acumulada TOTAL: 65%.
+   </p>
+
+   <div class="chart">
+    <canvas
+     id="chartTramoMeta"
+    ></canvas>
+   </div>
+
+  </div>
+
+
+  <div class="card">
+
+   <h3>
+    Cartera vs recuperado -10 a 90
+   </h3>
+
+   <p>
+    Comparación monetaria
+    por tramo ejecutivo.
+   </p>
+
+   <div class="chart">
+    <canvas
+     id="chartTramoMonto"
+    ></canvas>
+   </div>
+
+  </div>
+
+ </div>
+
+ `;
+
+
+ const labels =
+  filas.map(
+   x => x.nombre
+  );
+
+
+ graficoBarras(
+  "chartTramoMeta",
+  labels,
+
+  [
+   {
+    label:"% Real",
+
+    data:
+     filas.map(
+      x =>
+       x.m.porcentajeRecuperacion
+     )
+   },
+
+   {
+    label:"Meta",
+
+    data:
+     filas.map(
+      x => x.meta
+     )
+   }
+
+  ],
+
+  "porcentaje"
+ );
+
+
+ graficoBarras(
+  "chartTramoMonto",
+  labels,
+
+  [
+   {
+    label:"Cartera USD",
+
+    data:
+     filas.map(
+      x =>
+       x.m.cartera
+     )
+   },
+
+   {
+    label:"Recuperado USD",
+
+    data:
+     filas.map(
+      x =>
+       x.m.recuperado
+     )
+   }
+
+  ],
+
+  "dinero"
+ );
+
+}
+
+
+/* =========================================================
+   RENDER GENERAL
+========================================================= */
+
+function render(){
+
+ if(!DATA.length)
+  return;
+
+
+ const rows =
+  obtenerFiltrados();
+
+
+ renderEjecutivo(rows);
+
+ renderRecupero(rows);
+
+ renderGestion(rows);
+
+ renderCartera(rows);
+
+ renderAsesores(rows);
+
+ renderTramos(rows);
+
+}
+
+
+/* =========================================================
+   FILTROS UI
+========================================================= */
+
+function llenarFiltro(
+ id,
+ valores,
+ orden=[]
+){
+
+ const select =
+  document.getElementById(id);
+
+
+ const unicos =
+  [
+   ...new Set(
+    valores.filter(
+     x => x !== ""
+    )
+   )
+  ];
+
+
+ let lista;
+
+
+ if(orden.length){
+
+  lista =
+   orden.filter(
+    x =>
+     unicos.includes(x)
+   );
+
+
+  unicos.forEach(x=>{
+
+   if(!lista.includes(x))
+    lista.push(x);
+
+  });
+
+ }else{
+
+  lista =
+   unicos.sort(
+    (a,b) =>
+     String(a)
+      .localeCompare(
+       String(b),
+       "es"
+      )
+   );
+
+ }
+
+
+ select.innerHTML =
+  '<option value="__ALL__">Todos</option>' +
+
+  lista.map(
+   x =>
+    `<option value="${escapeHTML(x)}">
+      ${escapeHTML(x)}
+     </option>`
+  ).join("");
+
+}
+
+
+/* =========================================================
+   ASESORES
+========================================================= */
+
+function cargarAsesores(){
+
+ const asesores =
+  [
+   ...new Set(
+    DATA.map(
+     r =>
+      valorCampo(
+       r,
+       "ASESOR"
+      )
+    )
+    .filter(Boolean)
+   )
+  ]
+  .sort(
+   (a,b) =>
+    a.localeCompare(
+     b,
+     "es"
+    )
+  );
+
+
+ document.getElementById(
+  "asesorList"
+ ).innerHTML =
+
+ asesores.map(
+  a => `
+
+  <label class="multi-item">
+
+   <input
+    type="checkbox"
+    class="asesor-check"
+    value="${escapeHTML(a)}"
+   >
+
+   <span>
+    ${escapeHTML(a)}
+   </span>
+
+  </label>
+
+  `
+ ).join("");
+
+}
+
+
+function actualizarTextoAsesor(){
+
+ const b =
+  document.getElementById(
+   "asesorButton"
+  );
+
+
+ if(
+  selectedAsesores.size === 0
+ ){
+
+  b.textContent =
+   "Todos";
+
+ }else if(
+  selectedAsesores.size === 1
+ ){
+
+  b.textContent =
+   [...selectedAsesores][0];
+
+ }else{
+
+  b.textContent =
+   selectedAsesores.size +
+   " seleccionados";
+
+ }
+
+}
+
+
+/* =========================================================
+   ESTADOS
+========================================================= */
+
+function cargarEstados(){
+
+ const estados =
+  [
+   ...new Set(
+    DATA.map(
+     r =>
+      valorCampo(
+       r,
+       "ESTADO"
+      )
+    )
+    .filter(Boolean)
+   )
+  ]
+  .sort(
+   (a,b) =>
+    a.localeCompare(
+     b,
+     "es"
+    )
+  );
+
+
+ document.getElementById(
+  "estadoList"
+ ).innerHTML =
+
+ estados.map(
+  e => `
+
+  <label class="multi-item">
+
+   <input
+    type="checkbox"
+    class="estado-check"
+    value="${escapeHTML(e)}"
+   >
+
+   <span>
+    ${escapeHTML(e)}
+   </span>
+
+  </label>
+
+  `
+ ).join("");
+
+}
+
+
+function actualizarTextoEstado(){
+
+ const b =
+  document.getElementById(
+   "estadoButton"
+  );
+
+
+ if(
+  selectedEstados.size === 0
+ ){
+
+  b.textContent =
+   "Todos";
+
+ }else if(
+  selectedEstados.size === 1
+ ){
+
+  b.textContent =
+   [...selectedEstados][0];
+
+ }else{
+
+  b.textContent =
+   selectedEstados.size +
+   " seleccionados";
+
+ }
+
+}
+
+
+/* =========================================================
+   CARGAR FILTROS
+========================================================= */
+
+function cargarFiltros(){
+
+ llenarFiltro(
+  "fMes",
+  DATA.map(
+   r =>
+    valorCampo(r,"MES")
+  )
+ );
+
+
+ llenarFiltro(
+  "fCiclo",
+  DATA.map(
+   r =>
+    valorCampo(r,"CICLO")
+  ),
+  ORDEN_CICLO
+ );
+
+
+ llenarFiltro(
+  "fTramo",
+  DATA.map(
+   r =>
+    valorCampo(r,"TRAMO")
+  ),
+  ORDEN_TRAMO
+ );
+
+
+ llenarFiltro(
+  "fSbs",
+  DATA.map(
+   r =>
+    valorCampo(r,"SBS")
+  )
+ );
+
+
+ llenarFiltro(
+  "fPago",
+  [
+   "CON PAGO",
+   "SIN PAGO"
+  ]
+ );
+
+
+ llenarFiltro(
+  "fTipo",
+  DATA.map(
+   r =>
+    valorCampo(r,"TIPO")
+  ),
+  ORDEN_TIPO
+ );
+
+
+ cargarAsesores();
+
+ cargarEstados();
+
+}
+
+
+/* =========================================================
+   VALIDACIÓN DE COLUMNAS
+========================================================= */
+
+function validarColumnas(){
+
+ const obligatorias = {
+
+  OPERACION:COL.OP,
+
+  CICLO2:COL.CICLO,
+
+  TRAMO_CARTERA:COL.TRAMO,
+
+  ASESOR_ASIGN:COL.ASESOR,
+
+  CUOTA_DOLARIZADA:COL.CARTERA,
+
+  MONTO_PAGO_DOLARIZADO:
+   COL.RECUPERADO,
+
+  TIPO_CUOTA:COL.TIPO,
+
+  ESTADO:COL.ESTADO
+
+ };
+
+
+ const faltantes =
+  Object.entries(
+   obligatorias
+  )
+  .filter(
+   ([,i]) =>
+    i === undefined ||
+    i === null ||
+    i < 0
+  )
+  .map(
+   ([n]) => n
+  );
+
+
+ if(
+  faltantes.length
+ ){
+
+  throw new Error(
+   "Faltan columnas obligatorias: " +
+   faltantes.join(", ")
+  );
+
+ }
+
+}
+
+
+/* =========================================================
+   PROCESAR BUFFER
+========================================================= */
+
+async function procesarBuffer(
+ buffer,
+ nombreArchivo
+){
+
+ const status =
+  document.getElementById(
+   "status"
+  );
+
+
+ try{
+
+  status.className =
+   "status loading";
+
+  status.textContent =
+   "Procesando " +
+   nombreArchivo +
+   "...";
+
+
+  const wb =
+   XLSX.read(
+    buffer,
+    {
+     type:"array",
+     cellDates:true,
+     cellNF:false,
+     cellText:false
+    }
+   );
+
+
+  /*
+   Buscar primero la hoja exacta.
+  */
+
+  const hoja =
+   wb.SheetNames.find(
+    n =>
+     normalizar(n) ===
+     "MAFEVALUACION"
+   ) ||
+
+   wb.SheetNames.find(
+    n =>
+     normalizar(n)
+      .includes(
+       "MAFEVALUACION"
+      )
+   );
+
+
+  if(!hoja){
+
+   throw new Error(
+    "No se encontró la hoja " +
+    "'MAF Evaluacion'. Hojas disponibles: " +
+    wb.SheetNames.join(", ")
+   );
+
+  }
+
+
+  DATA =
+   XLSX.utils.sheet_to_json(
+    wb.Sheets[hoja],
+    {
+     defval:"",
+     raw:true,
+     blankrows:false
+    }
+   );
+
+
+  if(!DATA.length){
+
+   throw new Error(
+    "La hoja MAF Evaluacion " +
+    "no contiene registros."
+   );
+
+  }
+
+
+  HEADERS =
+   Object.keys(
+    DATA[0]
+   );
+
+
+  construirMapa();
+
+
+  validarColumnas();
+
+
+  /*
+   Reiniciar selecciones
+   cuando se carga un nuevo archivo.
+  */
+
+  selectedAsesores.clear();
+  selectedEstados.clear();
+
+  tipoFechaDesde = "";
+  tipoFechaHasta = "";
+  tipoPagoFiltro = "TODOS";
+
+
+  cargarFiltros();
+
+
+  document.getElementById(
+   "fileName"
+  ).textContent =
+   nombreArchivo;
+
+
+  status.className =
+   "status";
+
+
+  status.innerHTML =
+   "Archivo cargado correctamente. " +
+   "<b>" +
+   entero(DATA.length) +
+   "</b> registros.";
+
+
+  render();
+
+
+  console.log(
+   "MAF / RECUPERO v8.0",
+   {
+    hoja,
+    archivo:nombreArchivo,
+    registros:DATA.length,
+    columnas:HEADERS.length,
+    headers:HEADERS,
+    mapa:COL,
+    primerRegistro:DATA[0]
+   }
+  );
+
+
+ }catch(err){
+
+  DATA = [];
+
+  status.className =
+   "status error";
+
+  status.textContent =
+   "Error al cargar el archivo: " +
+   err.message;
+
+  console.error(
+   "Error MAF / RECUPERO:",
+   err
+  );
+
+ }
+
+}
+
+
+/* =========================================================
+   CARGAR ARCHIVO MANUAL
+========================================================= */
+
+async function cargarArchivoManual(
+ archivo
+){
+
+ if(!archivo)
+  return;
+
+
+ const buffer =
+  await archivo.arrayBuffer();
+
+
+ await procesarBuffer(
+  buffer,
+  archivo.name
+ );
+
+
+}
+
+
+/* =========================================================
+   CARGA AUTOMÁTICA DESDE GITHUB
+========================================================= */
+
+async function cargarExcelAutomatico(){
+
+ const status =
+  document.getElementById(
+   "status"
+  );
+
+
+ const fileName =
+  document.getElementById(
+   "fileName"
+  );
+
+
+ try{
+
+  status.className =
+   "status loading";
+
+  status.innerHTML =
+   "Cargando automáticamente " +
+   "<b>maf_2_v5.xlsx</b> desde el repositorio...";
+
+
+  fileName.textContent =
+   "Carga automática...";
+
+
+  /*
+   IMPORTANTE:
+
+   El parámetro ?v=Date.now()
+   evita utilizar una copia
+   antigua almacenada en caché.
+  */
+
+  const url =
+   EXCEL_FILE +
+   "?v=" +
+   Date.now();
+
+
+  const response =
+   await fetch(
+    url,
+    {
+     cache:"no-store"
+    }
+   );
+
+
+  if(!response.ok){
+
+   throw new Error(
+    "No se pudo descargar " +
+    EXCEL_FILE +
+    ". Código HTTP: " +
+    response.status
+   );
+
+  }
+
+
+  const buffer =
+   await response.arrayBuffer();
+
+
+  await procesarBuffer(
+   buffer,
+   "maf_2_v5.xlsx"
+  );
+
+
+ }catch(err){
+
+  DATA = [];
+
+  status.className =
+   "status error";
+
+  status.innerHTML =
+
+   "No se pudo cargar automáticamente " +
+   "<b>maf_2_v5.xlsx</b>. " +
+
+   "<br><br>" +
+
+   "Verifica que el archivo esté en la " +
+   "misma carpeta que index.html " +
+   "dentro de GitHub. " +
+
+   "<br><br>" +
+
+   "También puedes utilizar " +
+   "el botón <b>Seleccionar archivo</b> " +
+   "para cargarlo manualmente.";
+
+
+  fileName.textContent =
+   "Archivo no cargado";
+
+
+  console.error(
+   "Carga automática:",
+   err
+  );
+
+ }
+
+}
+
+
+/* =========================================================
+   EVENTOS FILTROS
+========================================================= */
+
+[
+ "fMes",
+ "fCiclo",
+ "fTramo",
+ "fSbs",
+ "fPago",
+ "fTipo"
+].forEach(id=>{
+
+ document
+  .getElementById(id)
+  .addEventListener(
+   "change",
+   render
+  );
+
+});
+
+
+/* =========================================================
+   LIMPIAR
+========================================================= */
+
+document.getElementById(
+ "clearBtn"
+).onclick = ()=>{
+
+ [
+  "fMes",
+  "fCiclo",
+  "fTramo",
+  "fSbs",
+  "fPago",
+  "fTipo"
+ ].forEach(
+  id =>
+   document.getElementById(
+    id
+   ).value =
+    "__ALL__"
+ );
+
+
+ selectedAsesores.clear();
+
+ selectedEstados.clear();
+
+
+ document
+  .querySelectorAll(
+   ".asesor-check"
+  )
+  .forEach(
+   c =>
+    c.checked = false
+  );
+
+
+ document
+  .querySelectorAll(
+   ".estado-check"
+  )
+  .forEach(
+   c =>
+    c.checked = false
+  );
+
+
+ actualizarTextoAsesor();
+
+ actualizarTextoEstado();
+
+
+ tipoFechaDesde = "";
+ tipoFechaHasta = "";
+ tipoPagoFiltro = "TODOS";
+
+
+ render();
+
+};
+
+
+/* =========================================================
+   ASESOR MULTISELECCIÓN
+========================================================= */
+
+document.getElementById(
+ "asesorButton"
+).onclick = ()=>{
+
+ document
+  .getElementById(
+   "asesorDropdown"
+  )
+  .classList
+  .toggle("open");
+
+};
+
+
+document.getElementById(
+ "selectAllAsesores"
+).onclick = ()=>{
+
+ selectedAsesores.clear();
+
+
+ document
+  .querySelectorAll(
+   ".asesor-check"
+  )
+  .forEach(c=>{
+
+   c.checked = true;
+
+   selectedAsesores.add(
+    c.value
+   );
+
+  });
+
+
+ actualizarTextoAsesor();
+
+};
+
+
+document.getElementById(
+ "clearAsesores"
+).onclick = ()=>{
+
+ selectedAsesores.clear();
+
+
+ document
+  .querySelectorAll(
+   ".asesor-check"
+  )
+  .forEach(
+   c =>
+    c.checked = false
+  );
+
+
+ actualizarTextoAsesor();
+
+};
+
+
+document.getElementById(
+ "applyAsesores"
+).onclick = ()=>{
+
+ selectedAsesores.clear();
+
+
+ document
+  .querySelectorAll(
+   ".asesor-check:checked"
+  )
+  .forEach(
+   c =>
+    selectedAsesores.add(
+     c.value
+    )
+  );
+
+
+ actualizarTextoAsesor();
+
+
+ document
+  .getElementById(
+   "asesorDropdown"
+  )
+  .classList
+  .remove("open");
+
+
+ render();
+
+};
+
+
+/* =========================================================
+   BUSCAR ASESOR
+========================================================= */
+
+document.getElementById(
+ "asesorSearch"
+).oninput = function(){
+
+ const q =
+  this.value
+   .toUpperCase()
+   .trim();
+
+
+ document
+  .querySelectorAll(
+   "#asesorList .multi-item"
+  )
+  .forEach(i=>{
+
+   i.style.display =
+    i.textContent
+     .toUpperCase()
+     .includes(q)
+      ? "flex"
+      : "none";
+
+  });
+
+};
+
+
+/* =========================================================
+   ESTADO MULTISELECCIÓN
+========================================================= */
+
+document.getElementById(
+ "estadoButton"
+).onclick = ()=>{
+
+ document
+  .getElementById(
+   "estadoDropdown"
+  )
+  .classList
+  .toggle("open");
+
+};
+
+
+document.getElementById(
+ "selectAllEstados"
+).onclick = ()=>{
+
+ selectedEstados.clear();
+
+
+ document
+  .querySelectorAll(
+   ".estado-check"
+  )
+  .forEach(c=>{
+
+   c.checked = true;
+
+   selectedEstados.add(
+    c.value
+   );
+
+  });
+
+
+ actualizarTextoEstado();
+
+};
+
+
+document.getElementById(
+ "clearEstados"
+).onclick = ()=>{
+
+ selectedEstados.clear();
+
+
+ document
+  .querySelectorAll(
+   ".estado-check"
+  )
+  .forEach(
+   c =>
+    c.checked = false
+  );
+
+
+ actualizarTextoEstado();
+
+};
+
+
+document.getElementById(
+ "applyEstados"
+).onclick = ()=>{
+
+ selectedEstados.clear();
+
+
+ document
+  .querySelectorAll(
+   ".estado-check:checked"
+  )
+  .forEach(
+   c =>
+    selectedEstados.add(
+     c.value
+    )
+  );
+
+
+ actualizarTextoEstado();
+
+
+ document
+  .getElementById(
+   "estadoDropdown"
+  )
+  .classList
+  .remove("open");
+
+
+ render();
+
+};
+
+
+/* =========================================================
+   CERRAR DROPDOWNS
+========================================================= */
+
+document.addEventListener(
+ "click",
+ e=>{
+
+  if(
+   !e.target.closest(
+    ".multi-select"
+   )
+  ){
+
+   document
+    .getElementById(
+     "asesorDropdown"
+    )
+    .classList
+    .remove("open");
+
+   document
+    .getElementById(
+     "estadoDropdown"
+    )
+    .classList
+    .remove("open");
+
+  }
+
+ }
+);
+
+
+/* =========================================================
+   NAVEGACIÓN
+========================================================= */
+
+document
+ .querySelectorAll(
+  ".nav-btn"
+ )
+ .forEach(b=>{
+
+  b.onclick = ()=>{
+
+   document
+    .querySelectorAll(
+     ".nav-btn"
+    )
+    .forEach(
+     x =>
+      x.classList
+       .remove("active")
+    );
+
+
+   document
+    .querySelectorAll(
+     ".view"
+    )
+    .forEach(
+     x =>
+      x.classList
+       .remove("active")
+    );
+
+
+   b.classList.add("active");
+
+
+   document
+    .getElementById(
+     b.dataset.view
+    )
+    .classList
+    .add("active");
+
+  };
+
+ });
+
+
+/* =========================================================
+   BOTÓN CARGA MANUAL
+========================================================= */
+
+document.getElementById(
+ "fileInput"
+).addEventListener(
+ "change",
+ async function(e){
+
+  const archivo =
+   e.target.files[0];
+
+  if(!archivo)
+   return;
+
+
+  await cargarArchivoManual(
+   archivo
+  );
+
+ }
+);
+
+
+/* =========================================================
+   INICIO AUTOMÁTICO
+========================================================= */
+
+document.addEventListener(
+ "DOMContentLoaded",
+ ()=>{
+
+  /*
+   Esperamos a que SheetJS
+   esté disponible.
+  */
+
+  if(
+   typeof XLSX ===
+   "undefined"
+  ){
+
+   document.getElementById(
+    "status"
+   ).className =
+    "status error";
+
+   document.getElementById(
+    "status"
+   ).textContent =
+    "No se pudo cargar la librería XLSX.";
+
+   return;
+
+  }
+
+
+  /*
+   Iniciar carga automática.
+  */
+
+  cargarExcelAutomatico();
+
+ }
+);
+
+</script>
+
+</body>
+</html>
