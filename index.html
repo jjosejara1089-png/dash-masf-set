@@ -180,6 +180,8 @@ tbody tr:hover{background:#E7F1F7}
     <button class="nav-btn active" data-view="ejecutivo">📊 Ejecutivo</button>
     <button class="nav-btn" data-view="recupero">💰 Recupero</button>
     <button class="nav-btn" data-view="gestion">📞 Gestión</button>
+    <button class="nav-btn" data-view="gestionDiaria">📅 Gestión diaria</button>
+    <button class="nav-btn" data-view="gestionSemanal">📆 Gestión semanal</button>
     <button class="nav-btn" data-view="cartera">📁 Cartera / Riesgo</button>
     <button class="nav-btn" data-view="asesores">👥 Asesores</button>
     <button class="nav-btn" data-view="tramos">🎯 Tramos -10 a 90</button>
@@ -234,6 +236,8 @@ tbody tr:hover{background:#E7F1F7}
 <div id="ejecutivo" class="view active"></div>
 <div id="recupero" class="view"></div>
 <div id="gestion" class="view"></div>
+<div id="gestionDiaria" class="view"></div>
+<div id="gestionSemanal" class="view"></div>
 <div id="cartera" class="view"></div>
 <div id="asesores" class="view"></div>
 <div id="tramos" class="view"></div>
@@ -1254,6 +1258,54 @@ function renderGestion(rows){
 /* =========================================================
    CARTERA / RIESGO
 ========================================================= */
+function fechaGestionSegura(row){
+    return fechaNormalizada(valor(row,COL.FECHA_GESTION));
+}
+function claveFechaGestion(row){
+    const d=fechaGestionSegura(row); if(!d) return "";
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+function semanaGestion(row){
+    const d=fechaGestionSegura(row); if(!d) return "";
+    return `SEM-${Math.min(5,Math.floor((d.getDate()-1)/7)+1)}`;
+}
+function metricasGestionVista(rows){
+    const qUnico=rows.reduce((a,r)=>a+numero(valor(r,COL.SOCIO)),0);
+    const gest=rows.reduce((a,r)=>a+numero(valor(r,COL.GEST_CALL)),0);
+    const cartera=rows.reduce((a,r)=>a+numero(valor(r,COL.CARTERA)),0);
+    const recuperado=rows.reduce((a,r)=>a+numero(valor(r,COL.RECUPERADO)),0);
+    const contactos=rows.reduce((a,r)=>a+numero(valor(r,COL.CONTAC_CALL)),0);
+    const promesas=rows.reduce((a,r)=>a+numero(valor(r,COL.PROMESA_CALL)),0);
+    return {qUnico,gest,cartera,recuperado,contactos,promesas,
+        intensidad:qUnico?gest/qUnico:0,
+        efectividad:cartera?recuperado/cartera*100:0,
+        cd:gest?contactos/gest*100:0};
+}
+function tablaGestionVista(rows,clave,titulo,subtitulo){
+    const grupos=new Map();
+    rows.forEach(r=>{const k=clave(r);if(!k)return;if(!grupos.has(k))grupos.set(k,[]);grupos.get(k).push(r);});
+    const entries=[...grupos.entries()].sort((a,b)=>/^\d{4}-/.test(a[0])?a[0].localeCompare(b[0]):numero(a[0].replace("SEM-",""))-numero(b[0].replace("SEM-","")));
+    let h=`<div class="card"><h2 class="card-title">${titulo}</h2><p class="card-sub">${subtitulo}</p><div class="table-wrap"><table><thead><tr><th>Periodo</th><th>DEUDOR_UNICO</th><th>CANT_GEST_CALL</th><th>Intensidad</th><th>Cartera USD</th><th>Recuperado USD</th><th>% Efect.</th><th>Contactos</th><th>% CD</th><th>Promesas</th></tr></thead><tbody>`;
+    entries.forEach(([k,data])=>{const m=metricasGestionVista(data);h+=`<tr><td><b>${escapeHTML(k)}</b></td><td>${entero(m.qUnico)}</td><td>${entero(m.gest)}</td><td>${m.intensidad.toFixed(2)}</td><td>${dinero(m.cartera)}</td><td>${dinero(m.recuperado)}</td><td>${porcentaje(m.efectividad)}</td><td>${entero(m.contactos)}</td><td>${porcentaje(m.cd)}</td><td>${entero(m.promesas)}</td></tr>`;});
+    const total=metricasGestionVista(rows);h+=`<tr class="total-row"><td>TOTAL</td><td>${entero(total.qUnico)}</td><td>${entero(total.gest)}</td><td>${total.intensidad.toFixed(2)}</td><td>${dinero(total.cartera)}</td><td>${dinero(total.recuperado)}</td><td>${porcentaje(total.efectividad)}</td><td>${entero(total.contactos)}</td><td>${porcentaje(total.cd)}</td><td>${entero(total.promesas)}</td></tr>`;
+    if(!entries.length)h+=`<tr><td colspan="10">No existen registros con FECHA_GESTION para los filtros seleccionados.</td></tr>`;
+    return {html:h+`</tbody></table></div></div>`,entries};
+}
+function renderGestionDiaria(rows){
+    const out=tablaGestionVista(rows.filter(fechaGestionSegura),claveFechaGestion,"Gestión diaria","Evolución según FECHA_GESTION.");
+    document.getElementById("gestionDiaria").innerHTML=out.html+`<div class="grid2"><div class="card"><h2 class="card-title">Gestiones por día</h2><p class="card-sub">CANT_GEST_CALL.</p><div class="chart-box"><canvas id="chartGestionDia"></canvas></div></div><div class="card"><h2 class="card-title">Cartera vs recuperado por día</h2><p class="card-sub">Montos según FECHA_GESTION.</p><div class="chart-box"><canvas id="chartRecuperoDia"></canvas></div></div></div>`;
+    const labels=out.entries.map(x=>x[0]);
+    crearGraficoBarras("chartGestionDia",labels,[{label:"Gestiones",data:out.entries.map(x=>metricasGestionVista(x[1]).gest),backgroundColor:"#8FC9ED"}],"number");
+    crearGraficoBarras("chartRecuperoDia",labels,[{label:"Cartera USD",data:out.entries.map(x=>metricasGestionVista(x[1]).cartera),backgroundColor:"#8FC9ED"},{label:"Recuperado USD",data:out.entries.map(x=>metricasGestionVista(x[1]).recuperado),backgroundColor:"#F7A8BB"}],"money");
+}
+function renderGestionSemanal(rows){
+    const out=tablaGestionVista(rows.filter(fechaGestionSegura),semanaGestion,"Gestión semanal · SEM-1 a SEM-5","SEM-1: 01-07 · SEM-2: 08-14 · SEM-3: 15-21 · SEM-4: 22-28 · SEM-5: 29-fin de mes.");
+    document.getElementById("gestionSemanal").innerHTML=out.html+`<div class="grid2"><div class="card"><h2 class="card-title">Intensidad por semana</h2><p class="card-sub">CANT_GEST_CALL / DEUDOR_UNICO.</p><div class="chart-box"><canvas id="chartIntensidadSemana"></canvas></div></div><div class="card"><h2 class="card-title">Efectividad por semana</h2><p class="card-sub">Recuperado / cartera.</p><div class="chart-box"><canvas id="chartEfectividadSemana"></canvas></div></div></div>`;
+    const labels=out.entries.map(x=>x[0]);
+    crearGraficoBarras("chartIntensidadSemana",labels,[{label:"Intensidad",data:out.entries.map(x=>metricasGestionVista(x[1]).intensidad),backgroundColor:"#8FC9ED"}],"number");
+    crearGraficoBarras("chartEfectividadSemana",labels,[{label:"% Efectividad",data:out.entries.map(x=>metricasGestionVista(x[1]).efectividad),backgroundColor:"#F7A8BB"}],"pct");
+}
+
 function renderCartera(rows){
     const grupos=agrupar(rows,COL.SBS);
 
@@ -1507,6 +1559,8 @@ function render(){
     if(APP.view==="ejecutivo") renderEjecutivo(rows);
     if(APP.view==="recupero") renderRecupero(rows);
     if(APP.view==="gestion") renderGestion(rows);
+    if(APP.view==="gestionDiaria") renderGestionDiaria(rows);
+    if(APP.view==="gestionSemanal") renderGestionSemanal(rows);
     if(APP.view==="cartera") renderCartera(rows);
     if(APP.view==="asesores") renderAsesores(rows);
     if(APP.view==="tramos") renderTramos(rows);
